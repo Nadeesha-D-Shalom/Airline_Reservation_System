@@ -3,21 +3,21 @@ package com.example.airlineReservationApp.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
-
 import java.time.LocalDateTime;
 
-@Entity // the thing that I have to implement in this project
-@Table(name = "flights")  // create table
+@Entity
+@Table(name = "flights")
 public class Flight {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // auto increment id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @NotBlank
     @Column(name = "flight_number", length = 10, nullable = false)
     private String flight_number;
 
-    @NotBlank // @NotBlank annotation is use for add the not null values --- ex- name = "" <- this cannot happened
+    @NotBlank
     @Column(name = "aircraft_type", length = 50, nullable = false)
     private String aircraft_type;
 
@@ -25,7 +25,7 @@ public class Flight {
     @Column(name = "country_of_register", length = 150, nullable = false)
     private String country_of_register;
 
-    @Min(0)  // jakarta validation the number is grater than 0. if -1/-3 will show as an error
+    @Min(0)
     @Column(name = "aircraft_AGE", nullable = false)
     private int aircraft_AGE;
 
@@ -56,103 +56,41 @@ public class Flight {
     @Column(name = "on_ground", nullable = false)
     private boolean on_ground;
 
-    public Flight() {
-    }
+    public Flight() {}
 
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public int getId() {
-        return id;
-    }
+    public String getFlight_number() { return flight_number; }
+    public void setFlight_number(String flight_number) { this.flight_number = flight_number; }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public String getAircraft_type() { return aircraft_type; }
+    public void setAircraft_type(String aircraft_type) { this.aircraft_type = aircraft_type; }
 
-    public String getFlight_number() {
-        return flight_number;
-    }
+    public String getCountry_of_register() { return country_of_register; }
+    public void setCountry_of_register(String country_of_register) { this.country_of_register = country_of_register; }
 
-    public void setFlight_number(String flight_number) {
-        this.flight_number = flight_number;
-    }
+    public int getAircraft_AGE() { return aircraft_AGE; }
+    public void setAircraft_AGE(int aircraft_AGE) { this.aircraft_AGE = aircraft_AGE; }
 
-    public String getAircraft_type() {
-        return aircraft_type;
-    }
+    public String getSerial_number() { return serial_number; }
+    public void setSerial_number(String serial_number) { this.serial_number = serial_number; }
 
-    public void setAircraft_type(String aircraft_type) {
-        this.aircraft_type = aircraft_type;
-    }
+    public String getAirline_name() { return airline_name; }
+    public void setAirline_name(String airline_name) { this.airline_name = airline_name; }
 
-    public String getCountry_of_register() {
-        return country_of_register;
-    }
+    public String getDeparture_city() { return departure_city; }
+    public void setDeparture_city(String departure_city) { this.departure_city = departure_city; }
 
-    public void setCountry_of_register(String country_of_register) {
-        this.country_of_register = country_of_register;
-    }
+    public String getArrival_city() { return arrival_city; }
+    public void setArrival_city(String arrival_city) { this.arrival_city = arrival_city; }
 
-    public int getAircraft_AGE() {
-        return aircraft_AGE;
-    }
+    public LocalDateTime getDeparture_time() { return departure_time; }
+    public void setDeparture_time(LocalDateTime departure_time) { this.departure_time = departure_time; }
 
-    public void setAircraft_AGE(int aircraft_AGE) {
-        this.aircraft_AGE = aircraft_AGE;
-    }
+    public LocalDateTime getArrival_time() { return arrival_time; }
+    public void setArrival_time(LocalDateTime arrival_time) { this.arrival_time = arrival_time; }
 
-    public String getSerial_number() {
-        return serial_number;
-    }
-
-    public void setSerial_number(String serial_number) {
-        this.serial_number = serial_number;
-    }
-
-    public String getAirline_name() {
-        return airline_name;
-    }
-
-    public void setAirline_name(String airline_name) {
-        this.airline_name = airline_name;
-    }
-
-    public String getDeparture_city() {
-        return departure_city;
-    }
-
-    public void setDeparture_city(String departure_city) {
-        this.departure_city = departure_city;
-    }
-
-    public String getArrival_city() {
-        return arrival_city;
-    }
-
-    public void setArrival_city(String arrival_city) {
-        this.arrival_city = arrival_city;
-    }
-
-    public LocalDateTime getDeparture_time() {
-        return departure_time;
-    }
-
-    public void setDeparture_time(LocalDateTime departure_time) {
-        this.departure_time = departure_time;
-    }
-
-    public LocalDateTime getArrival_time() {
-        return arrival_time;
-    }
-
-    public void setArrival_time(LocalDateTime arrival_time) {
-        this.arrival_time = arrival_time;
-    }
-
-    public boolean isOn_ground() {
-        return on_ground;
-    }
-
-    public void setOn_ground(boolean on_ground) {
-        this.on_ground = on_ground;
-    }
+    public boolean isOn_ground() { return on_ground; }
+    public void setOn_ground(boolean on_ground) { this.on_ground = on_ground; }
 }
