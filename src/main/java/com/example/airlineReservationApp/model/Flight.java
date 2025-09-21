@@ -2,14 +2,18 @@ package com.example.airlineReservationApp.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "flights")
+@Table(
+        name = "flights"
+        // If you want to prevent duplicates (same airline + number + departure time), uncomment below:
+//  , uniqueConstraints = @UniqueConstraint(
+//        name = "uk_airline_flight_departure",
+//        columnNames = {"airline_name", "flight_number", "departure_time"}
+//    )
+)
 public class Flight {
-
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
