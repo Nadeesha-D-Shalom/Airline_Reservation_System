@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Airline Flights — Table View</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --bg:#f4f7ff;
+            --panel:#ffffff;
+            --ink:#0e1726;
+            --muted:#5b6b8b;
+            --primary:#355cff;
+            --primary-2:#7aa2ff;
+            --ok:#16a34a;
+            --warn:#d94848;
+            --bd:#e6ebff;
+            --bd-2:#d7def7;
+            --shadow: 0 8px 28px rgba(19,35,75,.08);
+            --radius:14px;
+        }
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{
+            margin:0; background:var(--bg); color:var(--ink);
+            font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+        }
+
+        header{
+            position:sticky; top:0; z-index:10;
+            background: rgba(255,255,255,.85);
+            backdrop-filter: blur(8px);
+            border-bottom:1px solid var(--bd);
+        }
+        .bar{
+            max-width:1100px; margin:auto; padding:14px 18px;
+            display:flex; gap:14px; align-items:center; justify-content:space-between;
+        }
+        .brand{display:flex; align-items:center; gap:12px;}
+        .logo{ width:34px; height:34px; border-radius:10px; background: linear-gradient(135deg,#7aa2ff,#b7c9ff); box-shadow: inset 0 0 0 1px #a4b7ff;}
+        .brand h1{ margin:0; font-size:18px }
+        .badge{ font-size:12px; color:#304173; background:#eef3ff; border:1px solid var(--bd-2); padding:6px 10px; border-radius:999px; }
+
+        main{ max-width:1100px; margin:20px auto; padding:0 18px;}
+
+        .toolbar{
+            display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:10px;
+        }
+        .search{ position:relative; flex:1 1 380px; }
+        .search input{
+            width:100%; padding:12px 42px 12px 38px; border-radius:12px; border:1px solid var(--bd);
+            background:#fff; outline:none; transition: box-shadow .2s ease, border .2s ease;
+            box-shadow: var(--shadow);
+        }
+        .search input:focus{ border:1px solid var(--primary-2); box-shadow: 0 0 0 4px #355cff22, var(--shadow); }
+        .search .icon{ position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:.6; user-select:none }
+
+        .actions{ display:flex; gap:8px }
+        button{
+            border:0; border-radius:10px; padding:10px 14px; font-weight:700; cursor:pointer;
+            transition: transform .12s ease, box-shadow .2s ease, opacity .2s ease, background .2s ease;
+        }
+        .btn-ghost{ background:#fff; border:1px solid var(--bd); }
+        .btn-ghost:hover{ background:#f9fbff }
+        .btn-primary{ background:linear-gradient(180deg,#355cff,#2f52e6); color:#fff; box-shadow: 0 6px 16px rgba(53,92,255,.3)}
+        .btn-primary:hover{ transform: translateY(-1px) }
+
+        .chips button{
+            background:#fff; border:1px solid var(--bd); color:#304173; font-weight:700; padding:8px 12px;
+        }
+        .chips .chip.active{ border-color: var(--primary-2); background:#eef3ff }
+
+        .panel{
+            background:var(--panel); border:1px solid var(--bd); border-radius: var(--radius);
+            box-shadow: var(--shadow); overflow:hidden; animation: fade .35s ease;
+        }
+        @keyframes fade { from{opacity:0; transform: translateY(8px)} to{opacity:1; transform:none} }
+
+        table{ width:100%; border-collapse: collapse; }
+        thead th{
+            text-align:left; background:#f6f8ff; color:#2c3d6b; border-bottom:1px solid var(--bd);
+            padding:12px 14px; font-size:13px; letter-spacing:.2px;
+        }
+        tbody td{ padding:14px; border-bottom:1px solid #f1f4ff; vertical-align: top; }
+        tbody tr:hover{ background:#fafcff }
+        .status{ font-size:12px; font-weight:800; padding:6px 10px; border-radius:999px; display:inline-flex; gap:6px; align-items:center; }
+        .ok{ background:#eaf7ee; color:#0d6a2b; border:1px solid #b8e7c8 }
+        .warn{ background:#fdecec; color:#8d1e1e; border:1px solid #f6c0c0 }
+        .ops{ display:flex; gap:8px }
+        .btn-mini{ padding:7px 10px; border-radius:8px; font-size:12px; }
+        .btn-edit{ background:#ecf4ff; border:1px solid #cfe0ff; color:#2a4fb0 }
+        .btn-edit:hover{ background:#e4eeff }
+        .btn-del{ background:#fff0f1; border:1px solid #f7c7cd; color:#a32424 }
+        .btn-del:hover{ background:#ffe8ea }
+
+        .empty{ text-align:center; padding:24px; color:var(--muted); }
+
+        /* skeleton rows */
+        .skeleton td{ height:48px; position:relative; overflow:hidden }
+        .shimmer{
+            position:absolute; inset:8px 14px; border-radius:8px; background: linear-gradient(90deg,#eef2ff 25%,#f4f7ff 37%,#eef2ff 63%);
+            background-size:400% 100%; animation: shimmer 1.2s ease-in-out infinite;
+        }
+        @keyframes shimmer{ 0%{background-position:100% 0} 100%{background-position:0 0} }
+
+        /* modal */
+        .modal{ position:fixed; inset:0; display:none; place-items:center; padding:18px; z-index:20; }
+        .modal.show{ display:grid; }
+        .scrim{ position:absolute; inset:0; background:rgba(13,23,38,.35); backdrop-filter: blur(2px); }
+        .sheet{
+            position:relative; z-index:1; width:min(860px,96vw); background:#fff; border:1px solid var(--bd);
+            border-radius:18px; box-shadow: var(--shadow); padding:16px 16px 12px; animation: pop .22s ease;
+        }
+        @keyframes pop{ from{transform: translateY(10px); opacity:0} to{transform:none; opacity:1} }
+        .sheet h3{ margin:6px 6px 12px; }
+        .form-grid{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px; }
+        .col-2{ grid-column: span 2; }
+        .field{ display:flex; flex-direction:column; gap:6px; }
+        .field input{
+            border:1px solid var(--bd); border-radius:10px; padding:10px 12px;
+        }
+        .sheet .row{ display:flex; gap:8px; justify-content:flex-end; margin-top:10px }
+
+        /* toast */
+        .toast{ position:fixed; right:14px; bottom:14px; display:grid; gap:8px; z-index:30 }
+        .toast .msg{
+            background:#fff; border:1px solid var(--bd); border-left:4px solid var(--primary);
+            box-shadow: var(--shadow); padding:10px 12px; border-radius:10px; font-weight:600;
+            transform: translateY(8px); opacity:0; animation: toastIn .25s ease forwards;
+        }
+        .msg.ok{ border-left-color:#16a34a } .msg.err{ border-left-color:#d94848 }
+        @keyframes toastIn{ to{ transform:none; opacity:1 } }
+    </style>
+</head>
+<body>
+<header>
+    <div class="bar">
+        <div class="brand">
+            <div class="logo"></div>
+            <h1>Airline Flights</h1>
+            <span id="countBadge" class="badge">0 flights</span>
+        </div>
+        <div class="actions">
+            <button id="refreshBtn" class="btn-ghost" type="button">↻ Refresh</button>
+            <button id="addBtn" class="btn-primary" type="button">＋ Add flight</button>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="toolbar">
+        <div class="search">
+            <span class="icon">🔎</span>
+            <input id="q" placeholder="Search by airline, flight number, city, aircraft…" />
+        </div>
+        <div class="actions chips">
+            <button class="chip active" data-filter="all" type="button">All</button>
+            <button class="chip" data-filter="ground" type="button">On ground</button>
+            <button class="chip" data-filter="air" type="button">In air</button>
+        </div>
+    </div>
+
+    <div class="panel">
+        <table aria-label="Flights table">
+            <thead>
+            <tr>
+                <th style="width:64px">ID</th>
+                <th>Flight</th>
+                <th>Airline</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Departure</th>
+                <th>Arrival</th>
+                <th>Status</th>
+                <th style="width:160px">Actions</th>
+            </tr>
+            </thead>
+            <tbody id="rows">
+            <!-- skeleton while loading -->
+            <tr class="skeleton"><td colspan="9"><div class="shimmer"></div></td></tr>
+            <tr class="skeleton"><td colspan="9"><div class="shimmer"></div></td></tr>
+            <tr class="skeleton"><td colspan="9"><div class="shimmer"></div></td></tr>
+            <tr class="skeleton"><td colspan="9"><div class="shimmer"></div></td></tr>
+            </tbody>
+        </table>
+        <div id="empty" class="empty" style="display:none">No flights yet — add one with “Add flight” ✨</div>
+    </div>
+</main>
+
+<!-- modal -->
+<div id="modal" class="modal" aria-hidden="true">
+    <div class="scrim" data-close></div>
+    <div class="sheet">
+        <h3 id="modalTitle">Add flight</h3>
+        <form id="flightForm" novalidate>
+            <div class="form-grid">
+                <div class="field">
+                    <label for="flight_number">Flight number *</label>
+                    <input id="flight_number" maxlength="10" required placeholder="e.g., UL225" />
+                </div>
+                <div class="field">
+                    <label for="airline_name">Airline *</label>
+                    <input id="airline_name" maxlength="75" required placeholder="e.g., SriLankan Airlines" />
+                </div>
+
+                <div class="field">
+                    <label for="departure_city">Departure city *</label>
+                    <input id="departure_city" maxlength="50" required placeholder="Colombo" />
+                </div>
+                <div class="field">
+                    <label for="arrival_city">Arrival city *</label>
+                    <input id="arrival_city" maxlength="50" required placeholder="Dubai" />
+                </div>
+
+                <div class="field">
+                    <label for="departure_time">Departure time *</label>
+                    <input id="departure_time" type="datetime-local" required />
+                </div>
+                <div class="field">
+                    <label for="arrival_time">Arrival time *</label>
+                    <input id="arrival_time" type="datetime-local" required />
+                </div>
+
+                <div class="field">
+                    <label for="aircraft_type">Aircraft type *</label>
+                    <input id="aircraft_type" maxlength="50" required placeholder="Airbus A330-300" />
+                </div>
+                <div class="field">
+                    <label for="country_of_register">Country of register *</label>
+                    <input id="country_of_register" maxlength="150" required placeholder="Sri Lanka" />
+                </div>
+
+                <div class="field">
+                    <label for="aircraft_AGE">Aircraft age (years)</label>
+                    <input id="aircraft_AGE" type="number" min="0" step="1" value="0" />
+                </div>
+                <div class="field">
+                    <label for="serial_number">Serial number *</label>
+                    <input id="serial_number" maxlength="75" required placeholder="MSN 09876" />
+                </div>
+
+                <div class="field col-2">
+                    <label for="transit_airport">Transit airport (optional)</label>
+                    <input id="transit_airport" maxlength="50" placeholder="e.g., DOH" />
+                </div>
+
+                <div class="field col-2">
+                    <label>
+                        <input id="on_ground" type="checkbox" /> On ground
+                    </label>
+                </div>
+            </div>
+
+            <div class="row">
+                <button type="button" class="btn-ghost" data-close>Cancel</button>
+                <button class="btn-primary" type="submit">Save flight</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    // ========= CONFIG =========
+    // Auto-detect API base: if served over http(s) use same-origin, else default to localhost:8080
+    const API_BASE = (location.origin && !location.origin.startsWith('file')) ? '' : 'http://localhost:8080';
+    // ==========================
+
+    const rows = document.getElementById('rows');
+    const empty = document.getElementById('empty');
+    const q = document.getElementById('q');
+    const countBadge = document.getElementById('countBadge');
+    const addBtn = document.getElementById('addBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const toast = document.getElementById('toast');
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const form = document.getElementById('flightForm');
+    const fEl = id => document.getElementById(id);
+
+    let flights = [];
+    let filter = 'all';
+    let editingId = null;
+
+    // ---------- Toast ----------
+    function showToast(text, ok=true){
+        const el = document.createElement('div');
+        el.className = 'msg ' + (ok ? 'ok':'err');
+        el.textContent = text;
+        toast.appendChild(el);
+        setTimeout(()=> el.remove(), 2600);
+    }
+
+    // ---------- Date helpers (robust) ----------
+    // Accepts wide ISO: with/without seconds, millis, timezone (Z/±HH:mm)
+    function parseAnyIso(iso){
+        if(!iso || typeof iso !== 'string') return null;
+
+        // Local-like without timezone: YYYY-MM-DDTHH:mm[:ss[.SSS]]
+        const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?$/);
+        if(m){
+            const y=+m[1], mo=+m[2]-1, d=+m[3], h=+m[4], mi=+m[5], s=+(m[6]||0);
+            return new Date(y, mo, d, h, mi, s); // local
+        }
+
+        const t = Date.parse(iso); // handles Z/offset
+        return Number.isFinite(t) ? new Date(t) : null;
+    }
+    function formatDT(iso){
+        const d = parseAnyIso(iso);
+        return d ? d.toLocaleString() : '—';
+    }
+    function toLocalInput(iso){
+        const d = parseAnyIso(iso);
+        if(!d) return '';
+        const pad = n => String(n).padStart(2,'0');
+        return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+    function fromLocalInput(val){
+        if(!val) return null;
+        return val.length===16 ? val + ':00' : val;
+    }
+
+    // ---------- Modal ----------
+    function openModal(edit=false, data=null){
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden','false');
+        if(edit && data){
+            modalTitle.textContent = 'Edit flight';
+            editingId = data.id;
+            ['flight_number','airline_name','departure_city','arrival_city','aircraft_type','country_of_register','serial_number','transit_airport'].forEach(k=>{
+                fEl(k).value = data[k] ?? '';
+            });
+            fEl('aircraft_AGE').value = data.aircraft_AGE ?? 0;
+            fEl('on_ground').checked = !!data.on_ground;
+            fEl('departure_time').value = toLocalInput(data.departure_time);
+            fEl('arrival_time').value = toLocalInput(data.arrival_time);
+        }else{
+            modalTitle.textContent = 'Add flight';
+            editingId = null;
+            form.reset();
+            fEl('aircraft_AGE').value = 0;
+            fEl('on_ground').checked = false;
+        }
+    }
+    function closeModal(){
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden','true');
+    }
+    modal.addEventListener('click', (e)=>{
+        if(e.target.matches('[data-close], .scrim')) closeModal();
+    });
+
+    addBtn.addEventListener('click', ()=> openModal(false));
+    refreshBtn.addEventListener('click', ()=> loadFlights(true));
+
+    // ---------- Filters & search ----------
+    document.querySelectorAll('.chip').forEach(ch=>{
+        ch.addEventListener('click', ()=>{
+            document.querySelectorAll('.chip').forEach(c=> c.classList.remove('active'));
+            ch.classList.add('active');
+            filter = ch.dataset.filter;
+            render();
+        });
+    });
+    q.addEventListener('input', render);
+
+    // ---------- CRUD ----------
+    async function loadFlights(hard=false){
+        if(hard){
+            rows.innerHTML = `
+        <tr class="skeleton"><td colspan="9"><div class="shimmer"></div></td></tr>
+        <tr class="skeleton"><td colspan="9"><div class="shimmer"></div></td></tr>
+        <tr class="skeleton"><td colspan="9"><div class="shimmer"></div></td></tr>
+        <tr class="skeleton"><td colspan="9"><div class="shimmer"></div></td></tr>
+      `;
+            empty.style.display = 'none';
+        }
+        try{
+            const res = await fetch(`${API_BASE}/api/flights`, { headers: { Accept: 'application/json' }});
+            if(!res.ok) throw new Error('Failed to load flights');
+            const data = await res.json();
+            flights = Array.isArray(data) ? data : [];
+            render();
+            showToast('Flights loaded', true);
+        }catch(err){
+            console.error(err);
+            flights = [];
+            rows.innerHTML = '';
+            empty.style.display = 'block';
+            showToast('Could not load flights', false);
+        }
+    }
+
+    function rowHTML(f){
+        return `
+      <tr data-id="${f.id}">
+        <td>${f.id}</td>
+        <td><strong>${f.flight_number}</strong></td>
+        <td>${f.airline_name}</td>
+        <td>${f.departure_city}</td>
+        <td>${f.arrival_city}</td>
+        <td>${formatDT(f.departure_time)}</td>
+        <td>${formatDT(f.arrival_time)}</td>
+        <td>
+          <span class="status ${f.on_ground ? 'warn':'ok'}">
+            ${f.on_ground ? '🛬 On ground' : '🛫 In air'}
+          </span>
+        </td>
+        <td class="ops">
+          <button class="btn-mini btn-edit" type="button">Edit</button>
+          <button class="btn-mini btn-del" type="button">Delete</button>
+        </td>
+      </tr>
+    `;
+    }
+
+    function render(){
+        const term = (q.value||'').toLowerCase().trim();
+        const filtered = flights.filter(f=>{
+            if(filter==='ground' && !f.on_ground) return false;
+            if(filter==='air' && !!f.on_ground) return false;
+            const bag = [
+                f.flight_number, f.airline_name, f.departure_city, f.arrival_city, f.transit_airport,
+                f.aircraft_type, f.country_of_register, f.serial_number
+            ].map(x=> (x == null ? '' : String(x)).toLowerCase()).join(' ');
+            return !term || bag.includes(term);
+        });
+
+        countBadge.textContent = `${filtered.length} ${filtered.length===1?'flight':'flights'}`;
+
+        if(filtered.length===0){
+            rows.innerHTML = '';
+            empty.style.display = 'block';
+            return;
+        }
+        empty.style.display = 'none';
+        rows.innerHTML = filtered.map(rowHTML).join('');
+
+        // wire actions
+        rows.querySelectorAll('tr').forEach(tr=>{
+            const id = Number(tr.dataset.id);
+            const data = flights.find(x=> x.id===id);
+            const editBtn = tr.querySelector('.btn-edit');
+            const delBtn  = tr.querySelector('.btn-del');
+            if(editBtn) editBtn.addEventListener('click', ()=> openModal(true, data));
+            if(delBtn)  delBtn.addEventListener('click', ()=> onDelete(id));
+        });
+    }
+
+    async function onDelete(id){
+        if(!confirm('Delete this flight?')) return;
+        try{
+            const res = await fetch(`${API_BASE}/api/flights/${id}`,{ method:'DELETE' });
+            if(!res.ok) throw new Error('Delete failed');
+            flights = flights.filter(f=> f.id!==id);
+            render();
+            showToast('Flight deleted', true);
+        }catch(err){
+            console.error(err);
+            showToast('Could not delete flight', false);
+        }
+    }
+
+    form.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+
+        // basic client-side required checks
+        const requiredIds = ['flight_number','airline_name','departure_city','arrival_city','departure_time','arrival_time','aircraft_type','country_of_register','serial_number'];
+        for(const id of requiredIds){
+            if(!fEl(id).value.trim()){
+                showToast('Please fill all required fields (*)', false);
+                return;
+            }
+        }
+
+        const payload = {
+            id: editingId ?? undefined,
+            flight_number: fEl('flight_number').value.trim(),
+            aircraft_type: fEl('aircraft_type').value.trim(),
+            country_of_register: fEl('country_of_register').value.trim(),
+            aircraft_AGE: Number(fEl('aircraft_AGE').value || 0),
+            serial_number: fEl('serial_number').value.trim(),
+            airline_name: fEl('airline_name').value.trim(),
+            departure_city: fEl('departure_city').value.trim(),
+            arrival_city: fEl('arrival_city').value.trim(),
+            transit_airport: (fEl('transit_airport').value.trim() || null),
+            departure_time: fromLocalInput(fEl('departure_time').value), // "YYYY-MM-DDTHH:mm:00"
+            arrival_time: fromLocalInput(fEl('arrival_time').value),
+            on_ground: fEl('on_ground').checked
+        };
+
+        const method = editingId ? 'PUT' : 'POST';
+        const url = editingId ? `${API_BASE}/api/flights/${editingId}` : `${API_BASE}/api/flights`;
+
+        try{
+            const res = await fetch(url,{
+                method,
+                headers:{'Content-Type':'application/json', Accept:'application/json'},
+                body: JSON.stringify(payload)
+            });
+            if(!res.ok){
+                let msg = 'Validation failed or server error';
+                const ct = res.headers.get('content-type') || '';
+                if (ct.includes('application/json')) {
+                    try { const j = await res.json(); msg = j.message || msg; } catch {}
+                } else {
+                    try { msg = (await res.text()).slice(0, 180); } catch {}
+                }
+                throw new Error(msg);
+            }
+            const saved = await res.json();
+            if(editingId){
+                flights = flights.map(f=> f.id===saved.id ? saved : f);
+            }else{
+                flights = [saved, ...flights];
+            }
+            render();
+            closeModal();
+            burst();
+            showToast(editingId?'Flight updated':'Flight added', true);
+        }catch(err){
+            console.error(err);
+            showToast(err.message || 'Validation failed or server error', false);
+        }
+    });
+
+    // tiny confetti burst
+    function burst(){
+        const n = 14, baseX = window.innerWidth - 140, baseY = window.innerHeight - 30;
+        for(let i=0;i<n;i++){
+            const p = document.createElement('div');
+            p.style.position='fixed';
+            p.style.left = baseX+'px';
+            p.style.top = baseY+'px';
+            p.style.width=p.style.height='6px';
+            p.style.borderRadius='2px';
+            p.style.background = ['#355cff','#7aa2ff','#16a34a','#f59e0b','#ef4444'][i%5];
+            document.body.appendChild(p);
+            const dx = (Math.random()*160-80);
+            const dy = (Math.random()*120+80);
+            p.animate([
+                { transform:'translate(0,0) rotate(0)', opacity:1 },
+                { transform:`translate(${dx}px,-${dy}px) rotate(${(Math.random()*540-270)}deg)`, opacity:0 }
+            ], { duration: 900 + Math.random()*400, easing:'cubic-bezier(.2,.7,.2,1)' })
+                .onfinish = ()=> p.remove();
+        }
+    }
+
+    // ---------- Init ----------
+    loadFlights(true);
+</script>
+</body>
+</html>
