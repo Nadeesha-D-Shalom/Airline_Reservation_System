@@ -1,9 +1,8 @@
 package com.example.airlineReservationApp.controller;
 
-import com.example.airlineReservationApp.dto.FlightDTO;
 import com.example.airlineReservationApp.model.Flight;
-import com.example.airlineReservationApp.service.FlightService;
-import jakarta.validation.Valid;
+import com.example.airlineReservationApp.repository.FlightRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,36 +11,58 @@ import java.util.List;
 @RequestMapping("/api/flights")
 public class FlightController {
 
-    private final FlightService svc;
+    private final FlightRepository flightRepository;
 
-    public FlightController(FlightService svc) {
-        this.svc = svc;
+    public FlightController(FlightRepository flightRepository) {
+        this.flightRepository = flightRepository;
     }
 
+    // Get all flights
     @GetMapping
-    public List<FlightDTO> all() {
-        return svc.getAllFlights().stream()
-                .map(FlightDTO::fromEntity)
-                .toList();
+    public List<Flight> getAllFlights() {
+        return flightRepository.findAll();
     }
 
+    // Search
+    @GetMapping("/search")
+    public List<Flight> search(@RequestParam("q") String q) {
+        return flightRepository.searchFlights(q);
+    }
+
+    // Get by ID
     @GetMapping("/{id}")
-    public FlightDTO one(@PathVariable int id) {
-        return FlightDTO.fromEntity(svc.getFlightById(id));
+    public ResponseEntity<Flight> getFlight(@PathVariable Integer id) {
+        return flightRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
+    // Create
     @PostMapping
-    public FlightDTO create(@Valid @RequestBody Flight f) {
-        return FlightDTO.fromEntity(svc.createFlight(f));
+    public Flight createFlight(@RequestBody Flight flight) {
+        return flightRepository.save(flight);
     }
 
+    // Update
     @PutMapping("/{id}")
-    public FlightDTO update(@PathVariable int id, @Valid @RequestBody Flight f) {
-        return FlightDTO.fromEntity(svc.updateFlight(id, f));
+    public ResponseEntity<Flight> updateFlight(@PathVariable Integer id, @RequestBody Flight flight) {
+        return flightRepository.findById(id)
+                .map(existing -> {
+                    flight.setId(id);
+                    return ResponseEntity.ok(flightRepository.save(flight));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
+    // Delete
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable int id) {
-        svc.deleteFlight(id);
+    public ResponseEntity<?> deleteFlight(@PathVariable Integer id) {
+        return flightRepository.findById(id)
+                .map(f -> {
+                    flightRepository.delete(f);
+                    return ResponseEntity.noContent().build(); // compiles fine now
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
+
 }
