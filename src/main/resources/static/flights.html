@@ -171,18 +171,22 @@
                 <th>Airline</th>
                 <th>From</th>
                 <th>To</th>
-                <th>Departure</th>
-                <th>Arrival</th>
+                <th>Transit</th>
+                <th>Departure Date</th>
+                <th>Departure Time</th>
+                <th>Arrival Date</th>
+                <th>Arrival Time</th>
                 <th>Status</th>
                 <th style="width:160px">Actions</th>
             </tr>
             </thead>
+
             <tbody id="rows">
             <!-- skeleton while loading -->
-            <tr class="skeleton"><td colspan="9"><div class="shimmer"></div></td></tr>
-            <tr class="skeleton"><td colspan="9"><div class="shimmer"></div></td></tr>
-            <tr class="skeleton"><td colspan="9"><div class="shimmer"></div></td></tr>
-            <tr class="skeleton"><td colspan="9"><div class="shimmer"></div></td></tr>
+            <tr class="skeleton"><td colspan="12"><div class="shimmer"></div></td></tr>
+            <tr class="skeleton"><td colspan="12"><div class="shimmer"></div></td></tr>
+            <tr class="skeleton"><td colspan="12"><div class="shimmer"></div></td></tr>
+            <tr class="skeleton"><td colspan="12"><div class="shimmer"></div></td></tr>
             </tbody>
         </table>
         <div id="empty" class="empty" style="display:none">No flights yet — add one with “Add flight” ✨</div>
@@ -214,13 +218,23 @@
                     <input id="arrival_city" maxlength="50" required placeholder="Dubai" />
                 </div>
 
+                <!-- SPLIT date + time inputs -->
                 <div class="field">
-                    <label for="departure_time">Departure time *</label>
-                    <input id="departure_time" type="datetime-local" required />
+                    <label for="departure_date">Departure date *</label>
+                    <input id="departure_date" type="date" required />
                 </div>
                 <div class="field">
-                    <label for="arrival_time">Arrival time *</label>
-                    <input id="arrival_time" type="datetime-local" required />
+                    <label for="departure_clock">Departure time *</label>
+                    <input id="departure_clock" type="time" required />
+                </div>
+
+                <div class="field">
+                    <label for="arrival_date">Arrival date *</label>
+                    <input id="arrival_date" type="date" required />
+                </div>
+                <div class="field">
+                    <label for="arrival_clock">Arrival time *</label>
+                    <input id="arrival_clock" type="time" required />
                 </div>
 
                 <div class="field">
@@ -265,7 +279,6 @@
 
 <script>
     // ========= CONFIG =========
-    // Auto-detect API base: if served over http(s) use same-origin, else default to localhost:8080
     const API_BASE = (location.origin && !location.origin.startsWith('file')) ? '' : 'http://localhost:8080';
     // ==========================
 
@@ -294,34 +307,35 @@
         setTimeout(()=> el.remove(), 2600);
     }
 
-    // ---------- Date helpers (robust) ----------
-    // Accepts wide ISO: with/without seconds, millis, timezone (Z/±HH:mm)
+    // ---------- Date helpers ----------
     function parseAnyIso(iso){
         if(!iso || typeof iso !== 'string') return null;
-
-        // Local-like without timezone: YYYY-MM-DDTHH:mm[:ss[.SSS]]
         const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?$/);
         if(m){
             const y=+m[1], mo=+m[2]-1, d=+m[3], h=+m[4], mi=+m[5], s=+(m[6]||0);
-            return new Date(y, mo, d, h, mi, s); // local
+            return new Date(y, mo, d, h, mi, s);
         }
-
-        const t = Date.parse(iso); // handles Z/offset
+        const t = Date.parse(iso);
         return Number.isFinite(t) ? new Date(t) : null;
     }
-    function formatDT(iso){
-        const d = parseAnyIso(iso);
-        return d ? d.toLocaleString() : '—';
+    const pad = n => String(n).padStart(2,'0');
+    function toDateInput(iso){
+        const d = parseAnyIso(iso); if(!d) return '';
+        return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
     }
-    function toLocalInput(iso){
-        const d = parseAnyIso(iso);
-        if(!d) return '';
-        const pad = n => String(n).padStart(2,'0');
-        return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    function toTimeInput(iso){
+        const d = parseAnyIso(iso); if(!d) return '';
+        return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
-    function fromLocalInput(val){
-        if(!val) return null;
-        return val.length===16 ? val + ':00' : val;
+    function fromLocalPieces(dateStr, timeStr){
+        if(!dateStr || !timeStr) return null;
+        const t = timeStr.length===5 ? timeStr+':00' : timeStr; // ensure HH:mm:ss
+        return `${dateStr}T${t}`; // local-like string
+    }
+    function splitDT(iso){
+        const d = parseAnyIso(iso);
+        if(!d) return {date:'—', time:'—'};
+        return { date: `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`, time: `${pad(d.getHours())}:${pad(d.getMinutes())}` };
     }
 
     // ---------- Modal ----------
@@ -336,8 +350,11 @@
             });
             fEl('aircraft_AGE').value = data.aircraft_AGE ?? 0;
             fEl('on_ground').checked = !!data.on_ground;
-            fEl('departure_time').value = toLocalInput(data.departure_time);
-            fEl('arrival_time').value = toLocalInput(data.arrival_time);
+            // set split fields
+            fEl('departure_date').value = toDateInput(data.departure_time);
+            fEl('departure_clock').value = toTimeInput(data.departure_time);
+            fEl('arrival_date').value = toDateInput(data.arrival_time);
+            fEl('arrival_clock').value = toTimeInput(data.arrival_time);
         }else{
             modalTitle.textContent = 'Add flight';
             editingId = null;
@@ -372,10 +389,10 @@
     async function loadFlights(hard=false){
         if(hard){
             rows.innerHTML = `
-        <tr class="skeleton"><td colspan="9"><div class="shimmer"></div></td></tr>
-        <tr class="skeleton"><td colspan="9"><div class="shimmer"></div></td></tr>
-        <tr class="skeleton"><td colspan="9"><div class="shimmer"></div></td></tr>
-        <tr class="skeleton"><td colspan="9"><div class="shimmer"></div></td></tr>
+        <tr class="skeleton"><td colspan="12"><div class="shimmer"></div></td></tr>
+        <tr class="skeleton"><td colspan="12"><div class="shimmer"></div></td></tr>
+        <tr class="skeleton"><td colspan="12"><div class="shimmer"></div></td></tr>
+        <tr class="skeleton"><td colspan="12"><div class="shimmer"></div></td></tr>
       `;
             empty.style.display = 'none';
         }
@@ -396,6 +413,8 @@
     }
 
     function rowHTML(f){
+        const dep = splitDT(f.departure_time);
+        const arr = splitDT(f.arrival_time);
         return `
       <tr data-id="${f.id}">
         <td>${f.id}</td>
@@ -403,8 +422,11 @@
         <td>${f.airline_name}</td>
         <td>${f.departure_city}</td>
         <td>${f.arrival_city}</td>
-        <td>${formatDT(f.departure_time)}</td>
-        <td>${formatDT(f.arrival_time)}</td>
+        <td>${f.transit_airport ? f.transit_airport : '-'}</td>
+        <td>${dep.date}</td>
+        <td>${dep.time}</td>
+        <td>${arr.date}</td>
+        <td>${arr.time}</td>
         <td>
           <span class="status ${f.on_ground ? 'warn':'ok'}">
             ${f.on_ground ? '🛬 On ground' : '🛫 In air'}
@@ -417,6 +439,7 @@
       </tr>
     `;
     }
+
 
     function render(){
         const term = (q.value||'').toLowerCase().trim();
@@ -468,14 +491,18 @@
     form.addEventListener('submit', async (e)=>{
         e.preventDefault();
 
-        // basic client-side required checks
-        const requiredIds = ['flight_number','airline_name','departure_city','arrival_city','departure_time','arrival_time','aircraft_type','country_of_register','serial_number'];
+        // required checks
+        const requiredIds = ['flight_number','airline_name','departure_city','arrival_city','departure_date','departure_clock','arrival_date','arrival_clock','aircraft_type','country_of_register','serial_number'];
         for(const id of requiredIds){
-            if(!fEl(id).value.trim()){
+            const el = fEl(id);
+            if(!el || !String(el.value||'').trim()){
                 showToast('Please fill all required fields (*)', false);
                 return;
             }
         }
+
+        const departure_time = fromLocalPieces(fEl('departure_date').value, fEl('departure_clock').value);
+        const arrival_time   = fromLocalPieces(fEl('arrival_date').value,   fEl('arrival_clock').value);
 
         const payload = {
             id: editingId ?? undefined,
@@ -488,8 +515,8 @@
             departure_city: fEl('departure_city').value.trim(),
             arrival_city: fEl('arrival_city').value.trim(),
             transit_airport: (fEl('transit_airport').value.trim() || null),
-            departure_time: fromLocalInput(fEl('departure_time').value), // "YYYY-MM-DDTHH:mm:00"
-            arrival_time: fromLocalInput(fEl('arrival_time').value),
+            departure_time, // local-like "YYYY-MM-DDTHH:mm:ss"
+            arrival_time,
             on_ground: fEl('on_ground').checked
         };
 
