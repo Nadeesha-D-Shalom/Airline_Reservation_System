@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body{margin:0;font-family:Arial, sans-serif;background:#f4f7ff;}
+        header{background:#355cff;color:#fff;padding:1rem;text-align:center;font-weight:bold;font-size:1.2rem;}
+        .container{max-width:1100px;margin:20px auto;background:#fff;padding:20px;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.08);}
+        h2{margin:0 0 10px;}
+        table{width:100%;border-collapse:collapse;margin-top:20px;}
+        th,td{padding:10px;border-bottom:1px solid #e6ebff;text-align:left;}
+        th{background:#f4f7ff;}
+        .btn{padding:6px 12px;border:none;border-radius:6px;cursor:pointer;font-size:14px;}
+        .btn-add{background:#16a34a;color:#fff;}
+        .btn-edit{background:#355cff;color:#fff;}
+        .btn-delete{background:#d94848;color:#fff;}
+        .btn-pay{background:#ff9800;color:#fff;}
+        .sheet{display:none;position:fixed;bottom:0;left:0;width:100%;background:#fff;box-shadow:0 -6px 18px rgba(0,0,0,.2);border-radius:14px 14px 0 0;padding:20px;max-height:80%;overflow-y:auto;}
+        .form-group{margin:10px 0;}
+        label{display:block;font-weight:600;margin-bottom:5px;}
+        input,select{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;}
+        .actions{display:flex;gap:8px;}
+    </style>
+</head>
+<body>
+<header>Booking Management</header>
+
+<div class="container">
+    <button class="btn btn-add" onclick="openSheet()">+ Add Booking</button>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th><th>Passenger</th><th>Flight</th><th>Seat</th><th>Status</th><th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+    </table>
+</div>
+
+<!-- Bottom Sheet -->
+<div class="sheet" id="sheet">
+    <h2 id="formTitle">Add Booking</h2>
+    <div class="form-group">
+        <label>Passenger Name</label>
+        <input type="text" id="passenger"/>
+    </div>
+    <div class="form-group">
+        <label>Flight Number</label>
+        <input type="text" id="flightNo"/>
+    </div>
+    <div class="form-group">
+        <label>Seat</label>
+        <input type="text" id="seat"/>
+    </div>
+    <div class="form-group">
+        <label>Status</label>
+        <select id="status">
+            <option value="Confirmed">Confirmed</option>
+            <option value="Pending">Pending</option>
+            <option value="Cancelled">Cancelled</option>
+        </select>
+    </div>
+    <button class="btn btn-add" onclick="saveBooking()">Save</button>
+    <button class="btn btn-delete" onclick="closeSheet()">Cancel</button>
+</div>
+
+<script>
+    let bookings = [];
+    let editingId = null;
+
+    const rows = document.getElementById("rows");
+    const sheet = document.getElementById("sheet");
+    const f = id => document.getElementById(id);
+
+    function render(){
+        rows.innerHTML = "";
+        bookings.forEach(b=>{
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+        <td>${b.id}</td>
+        <td>${b.passenger}</td>
+        <td>${b.flightNo}</td>
+        <td>${b.seat}</td>
+        <td>${b.status}</td>
+        <td class="actions">
+          <button class="btn btn-edit" onclick="editBooking(${b.id})">Edit</button>
+          <button class="btn btn-delete" onclick="deleteBooking(${b.id})">Delete</button>
+          <button class="btn btn-pay" onclick="proceedPayment(${b.id})">Payment</button>
+        </td>`;
+            rows.appendChild(tr);
+        });
+    }
+
+    function openSheet(){
+        sheet.style.display="block";
+        editingId=null;
+        f("formTitle").textContent="Add Booking";
+        f("passenger").value="";
+        f("flightNo").value="";
+        f("seat").value="";
+        f("status").value="Confirmed";
+    }
+
+    function closeSheet(){ sheet.style.display="none"; }
+
+    function saveBooking(){
+        const b={
+            id: editingId || Date.now(),
+            passenger:f("passenger").value,
+            flightNo:f("flightNo").value,
+            seat:f("seat").value,
+            status:f("status").value
+        };
+        if(editingId){
+            bookings=bookings.map(x=>x.id===editingId?b:x);
+        }else{
+            bookings.push(b);
+        }
+        closeSheet(); render();
+    }
+
+    function editBooking(id){
+        const b=bookings.find(x=>x.id===id);
+        if(!b) return;
+        editingId=id;
+        f("formTitle").textContent="Edit Booking";
+        f("passenger").value=b.passenger;
+        f("flightNo").value=b.flightNo;
+        f("seat").value=b.seat;
+        f("status").value=b.status;
+        sheet.style.display="block";
+    }
+
+    function deleteBooking(id){
+        bookings=bookings.filter(x=>x.id!==id);
+        render();
+    }
+
+    function proceedPayment(id){
+        alert("Proceed to payment for booking "+id+" (handled by Payment module)");
+    }
+
+    render();
+</script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Bookings</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>My Bookings</header>
+<div class="container">
+    <div class="panel">
+        <table>
+            <thead>
+            <tr><th>ID</th><th>Flight</th><th>Seats</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="rows"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const rows=document.getElementById("rows");
+
+    async function loadBookings(){
+        const res = await fetch("http://localhost:8080/api/bookings");
+        if(!res.ok){ rows.innerHTML="<tr><td colspan='5'>Error loading</td></tr>"; return; }
+        const data = await res.json();
+        if(data.length===0){
+            rows.innerHTML="<tr><td colspan='5'>No bookings found</td></tr>";
+            return;
+        }
+        rows.innerHTML = data.map(b => `
+      <tr>
+        <td>${b.id}</td>
+        <td>${b.flightId}</td>
+        <td>${b.seatNumbers}</td>
+        <td><span class="status confirmed">${b.status}</span></td>
+        <td>
+          <button class="btn btn-success" onclick="editBooking(${b.id})">Edit</button>
+          <button class="btn btn-danger" onclick="deleteBooking(${b.id})">Delete</button>
+        </td>
+      </tr>`).join("");
+    }
+
+    async function deleteBooking(id){
+        await fetch(`http://localhost:8080/api/bookings/${id}`, {method:"DELETE"});
+        loadBookings();
+    }
+
+    function editBooking(id){
+        localStorage.setItem("editBookingId", id);
+        window.location.href="EditBooking.html";
+    }
+
+    loadBookings();
+</script>
+</body>
+</html>
