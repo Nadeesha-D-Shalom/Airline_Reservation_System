@@ -7,11 +7,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(
         name = "flights"
-        // If you want to prevent duplicates (same airline + number + departure time), uncomment below:
-//  , uniqueConstraints = @UniqueConstraint(
-//        name = "uk_airline_flight_departure",
-//        columnNames = {"airline_name", "flight_number", "departure_time"}
-//    )
+
 )
 public class Flight {
 
@@ -53,11 +49,11 @@ public class Flight {
 
     @NotNull
     @Column(name = "departure_time", nullable = false)
-    private LocalDateTime departure_time;
+    private LocalDateTime departure_time;   // Validations - validate date and time
 
     @NotNull
     @Column(name = "arrival_time", nullable = false)
-    private LocalDateTime arrival_time;
+    private LocalDateTime arrival_time;   // Validations
 
     @Column(name = "on_ground", nullable = false)
     private boolean on_ground;
