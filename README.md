@@ -1,139 +1,153 @@
-✈️ Web-based Airline Ticket Reservation System
-📌 Overview
+# ✈️ Airline Ticket Reservation System
 
-The Airline Ticket Reservation System is a Java-based web application built to simplify airline bookings for both passengers and staff. It allows users to search flights, select seats, manage bookings, make (simulated) payments, submit complaints, and participate in loyalty programs.
+![Java](https://img.shields.io/badge/Java-17-blue?logo=java\&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/SpringBoot-3.0-brightgreen?logo=springboot\&logoColor=white)
+![MySQL](https://img.shields.io/badge/Database-MySQL-orange?logo=mysql\&logoColor=white)
+![Status](https://img.shields.io/badge/Status-In%20Progress-yellow)
+![License](https://img.shields.io/badge/License-Academic-lightgrey)
 
-The system reduces manual work for staff while ensuring a secure, efficient, and user-friendly experience for travelers.
+---
 
-👥 Team Information
+## 📖 Project Overview
 
-Group ID: 2025-Y2-S1-MLB-B9G1-01
-Module Code: SE2030 – Software Engineering
+The **Airline Ticket Reservation System** is a full-stack Java web application developed as part of the **SE2030 – Software Engineering** module.
 
-Name	Student ID
-Chedima Imashi K.H.	IT24102218
-Palliyage D.S.R.	IT24102226
-Dias M.B.N.S.	IT24102244
-Pataka Ralalage A.N.H.	IT24102321
-Vidushan K.G.A.D.	IT24102189
-Pehesara A.D.	IT24102305
-⚙️ Features Implemented
-🔹 Passenger & Staff Profiles
+It simplifies flight booking for passengers while helping staff manage flights, payments, complaints, and loyalty programs.
+The system is **secure, efficient, and user-friendly**, designed to reduce manual work for airline staff and improve the overall passenger experience.
 
-Register and manage accounts (CRUD).
+---
 
-Update personal details like contact, passport number.
+## 👥 Team Information
 
-Secure login/logout with password encryption.
+**Group ID:** 2025-Y2-S1-MLB-B9G1-01
 
-🔹 Flight Management
+| Name                   | Student ID |
+| ---------------------- | ---------- |
+| Chedima Imashi K.H.    | IT24102218 |
+| Palliyage D.S.R.       | IT24102226 |
+| Dias M.B.N.S.          | IT24102244 |
+| Pataka Ralalage A.N.H. | IT24102321 |
+| Vidushan K.G.A.D.      | IT24102189 |
+| Pehesara A.D.          | IT24102305 |
 
-Add, update, delete, and view flights.
+---
 
-Search available flights with filters (time, cost, destination).
+## ✨ Key Features
 
-🔹 Booking Management
+### 👤 Passenger & Staff Profiles
 
-Book flights with seat selection.
+* Secure login/logout with encrypted passwords
+* Register, update, and manage user details
+* Role-based access (Admin, Customer, Staff, Finance, Marketing)
 
-View booking history and details.
+### 🛫 Flight Management
 
-Update or cancel bookings before payment.
+* Add, edit, delete, and view flights
+* Search flights by destination, time, or availability
 
-🔹 Payment (Simulation)
+### 🎟️ Booking Management
 
-Record and confirm payments (simulated, not real gateway).
+* Book flights with seat selection
+* View booking history
+* Edit or cancel bookings before payment
 
-Track payment status for bookings.
+### 💳 Payment System (Simulation)
 
-Integrated with booking confirmation.
+* Record and confirm payments (simulated, no real gateway)
+* Track payment status linked to bookings
 
-🔹 Complaint Management
+### 📩 Complaint Management
 
-Passengers submit, edit, and track complaints.
+* Passengers can submit complaints
+* Staff can update and resolve issues
 
-Staff resolves issues and updates complaint status.
+### 🎁 Marketing & Loyalty
 
-🔹 Marketing & Loyalty Programs
+* Loyalty program with reward points
+* Seasonal promotions and discounts
+* Redeem points for offers
 
-Add promotions, discounts, and loyalty points.
+---
 
-Customers can redeem points for offers.
+## ⚙️ Non-Functional Highlights
 
-Seasonal promotions managed by Marketing team.
+* 🔒 **Security**: Encrypted authentication & session handling
+* ⚡ **Performance**: Fast search & booking process
+* 📈 **Scalability**: Supports growing users and flights
+* 🎨 **Usability**: Clean, intuitive user interface
+* 🛠️ **Maintainability**: Well-structured modular code
 
-🔐 Non-Functional Features
+---
 
-Security: Encrypted login & session handling.
+## 🛠️ Tech Stack
 
-Performance: Fast booking and search flow.
+* **Backend:** Java, Spring Boot
+* **Frontend:** HTML, CSS, JavaScript
+* **Database:** MySQL / MS SQL
+* **Server:** Apache Tomcat
 
-Scalability: Designed to handle more users/flights.
+---
 
-Usability: Clean, user-friendly UI.
+## 📌 Updates & Improvements
 
-Maintainability: Modular code structure for easy updates.
+✅ Flight CRUD operations implemented
+✅ Booking status page with confirmation/cancellation
+✅ Edit/Cancel bookings before payment
+✅ Payment UI with cost breakdown & booking details
+✅ Complaint module with full CRUD
+✅ Admin dashboard for flights, users, and complaints
+✅ Loyalty & promotions module
 
-🛠️ Tech Stack
+---
 
-Backend: Java, Spring Boot
+## 🚀 Getting Started
 
-Frontend: HTML, CSS, JavaScript (Vanilla / Bootstrap for UI)
+### 🔧 Prerequisites
 
-Database: MS SQL / MySQL (depending on environment)
+* Java 17+
+* Maven / Gradle
+* MySQL (or MS SQL)
+* IntelliJ IDEA / Eclipse
 
-Server: Apache Tomcat (Local Deployment)
+### ▶️ Run Locally
 
-📌 Updates & Contributions
-
-During development, we added and improved the following:
-
-✅ Flight CRUD Operations – implemented full Create/Read/Update/Delete for flights.
-
-✅ Booking Status Page – now shows confirmed/cancelled bookings.
-
-✅ Edit/Cancel Booking Before Payment – users can update details or cancel before proceeding.
-
-✅ Payment UI – added payment calculation panel (right side) with booking details in the middle.
-
-✅ Complaint Module – complete CRUD for complaints.
-
-✅ Admin Dashboard – manage flights, bookings, users, and complaints.
-
-✅ Loyalty Program Module – integrated reward points & promotions.
-
-🚀 How to Run
-
-Clone the repository:
-
+```bash
+# Clone repository
 git clone https://github.com/<your-username>/AirlineReservationApp.git
 
+# Open in IDE and configure DB in application.properties
+spring.datasource.url=jdbc:mysql://localhost:3306/airline_db
+spring.datasource.username=root
+spring.datasource.password=yourpassword
 
-Open in IntelliJ IDEA / Eclipse.
+# Run with Spring Boot
+mvn spring-boot:run
+```
 
-Configure database connection in application.properties.
+Access at 👉 `http://localhost:8080`
 
-Run the project with Spring Boot or deploy on Tomcat.
+---
 
-Access the app via:
+## 📈 Future Enhancements
 
-http://localhost:8080
+* 📱 Mobile application (Android/iOS)
+* 🌍 Real-time airline API integration
+* 💳 Real payment gateway support
+* ☁️ Cloud hosting & CI/CD
 
-📌 Future Enhancements
+---
 
-Mobile app support (Android/iOS).
+## 📷 Screenshots (Optional)
 
-Real payment gateway integration.
+*Add login page, flight search, booking page, and admin dashboard screenshots here.*
 
-Real-time airline API for live flight data.
+---
 
-Cloud hosting for production use.
+## 📝 License
 
-📷 Screenshots
-
-(Add screenshots of Login, Flight Search, Booking, and Admin Dashboard here.)
-
-📝 License
-
-This project was developed as part of SE2030 – Software Engineering coursework.
+This project was developed as part of **SE2030 – Software Engineering** coursework.
 Feel free to fork and experiment, but please credit the original authors.
+
+---
+
+👉 Nadeesha, do you also want me to **design a `project banner image`** (with your project name, logo, and theme colors) to place at the very top of the README? That makes repos look even more professional.
