@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Passenger Details</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; background:#f4f7ff; margin:0; padding:0; display:flex; flex-direction:column; align-items:center; }
+        header { width:100%; padding:1rem; background:#355cff; color:#fff; text-align:center; font-size:1.2rem; font-weight:bold; }
+        form { margin-top:20px; background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,.1); width:90%; max-width:500px; }
+        label { display:block; margin-top:10px; font-weight:bold; }
+        input { width:100%; padding:8px; margin-top:5px; border:1px solid #ccc; border-radius:6px; }
+        button { margin-top:20px; padding:10px 20px; background:#355cff; border:none; color:#fff; border-radius:6px; font-size:1rem; cursor:pointer; width:100%; }
+    </style>
+</head>
+<body>
+<header>Edit Passenger Details</header>
+
+<form id="editForm">
+    <label>Seat
+        <input type="text" id="seatId" disabled>
+    </label>
+    <label>Full Name
+        <input type="text" id="passengerName" required>
+    </label>
+    <label>Email
+        <input type="email" id="passengerEmail">
+    </label>
+    <label>Passport ID
+        <input type="text" id="passportId" required>
+    </label>
+    <label>NIC
+        <input type="text" id="nic" required>
+    </label>
+    <label>Address
+        <input type="text" id="address" required>
+    </label>
+    <button type="submit">Save Changes</button>
+</form>
+
+<script>
+    const API_BASE = "http://localhost:8080/api/bookings";
+    const params = new URLSearchParams(window.location.search);
+    const bookingId = params.get("bookingId");
+    const ticketId = parseInt(params.get("ticketId"));
+
+    let bookingData = null;
+    let ticketData = null;
+
+    async function loadTicket(){
+        const res = await fetch(`${API_BASE}/${bookingId}`);
+        if(!res.ok) { alert("Failed to load booking"); return; }
+        bookingData = await res.json();
+        ticketData = bookingData.tickets.find(t => t.ticketId === ticketId);
+        if(!ticketData){ alert("Ticket not found"); return; }
+
+        document.getElementById("seatId").value = ticketData.seatId;
+        document.getElementById("passengerName").value = ticketData.passengerName;
+        document.getElementById("passengerEmail").value = ticketData.passengerEmail || "";
+        document.getElementById("passportId").value = ticketData.passportId;
+        document.getElementById("nic").value = ticketData.nic;
+        document.getElementById("address").value = ticketData.address;
+    }
+
+    document.getElementById("editForm").onsubmit = async e => {
+        e.preventDefault();
+
+        ticketData.passengerName = document.getElementById("passengerName").value;
+        ticketData.passengerEmail = document.getElementById("passengerEmail").value;
+        ticketData.passportId = document.getElementById("passportId").value;
+        ticketData.nic = document.getElementById("nic").value;
+        ticketData.address = document.getElementById("address").value;
+
+        // Replace updated ticket in booking
+        bookingData.tickets = bookingData.tickets.map(t =>
+            t.ticketId === ticketId ? ticketData : t
+        );
+
+        const res = await fetch(`${API_BASE}/${bookingId}`, {
+            method:"PUT",
+            headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify(bookingData)
+        });
+
+        if(res.ok){
+            alert("Passenger updated successfully!");
+            window.location.href = `BookingStatus.html?bookingId=${bookingId}`;
+        } else {
+            alert("Update failed!");
+        }
+    };
+
+    loadTicket();
+</script>
+</body>
+</html>

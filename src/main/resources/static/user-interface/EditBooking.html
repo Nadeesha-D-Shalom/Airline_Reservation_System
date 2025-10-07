@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Booking</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>Edit Booking</header>
+<div class="container">
+    <div class="panel">
+        <div id="info"></div>
+        <br>
+        <input type="text" id="newSeats" placeholder="Enter new seats e.g. 12A,12B" style="padding:8px;width:60%">
+        <br><br>
+        <button class="btn btn-primary" onclick="save()">Save Changes</button>
+    </div>
+</div>
+
+<script>
+    const id=localStorage.getItem("editBookingId");
+
+    async function loadBooking(){
+        const res=await fetch(`http://localhost:8080/api/bookings/${id}`);
+        if(res.ok){
+            const b=await res.json();
+            document.getElementById("info").innerText="Current Seats: "+b.seatNumbers;
+        }
+    }
+
+    async function save(){
+        const newSeats=document.getElementById("newSeats").value;
+        if(!newSeats){ alert("Enter new seats"); return; }
+        const res = await fetch(`http://localhost:8080/api/bookings/${id}`, {
+            method:"PUT",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({seatNumbers:newSeats, passengerName:"John Doe", status:"Confirmed"})
+        });
+        if(res.ok){
+            window.location.href="MyBookings.html";
+        } else {
+            alert("Update failed");
+        }
+    }
+
+    loadBooking();
+</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!--
+    http://localhost:8080/user-interface/user-facing-flights.html
+-->
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Available Flights</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body{margin:0;background:#f4f7ff;color:#0e1726;font-family:Inter,system-ui;}
+        header{background:#fff;border-bottom:1px solid #e6ebff;position:sticky;top:0;z-index:10;}
+        .bar{max-width:1100px;margin:auto;padding:16px;display:flex;align-items:center;justify-content:center;}
+        .brand h1{margin:0;font-size:22px;font-weight:800;color:#2a3d7b;}
+
+        main{max-width:1100px;margin:20px auto;padding:0 18px;display:grid;gap:18px;}
+        .card{
+            background:#fff;border:1px solid #e6ebff;border-radius:14px;box-shadow:0 6px 18px rgba(19,35,75,.08);
+            padding:18px;display:grid;grid-template-columns: 1fr auto;gap:16px;align-items:center;
+            transition:transform .15s ease, box-shadow .2s ease;
+        }
+        .card:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(19,35,75,.12);}
+        .flight-info{display:grid;gap:8px;font-size:14px;}
+        .flight-row{display:flex;gap:16px;align-items:center;}
+        .flight-row strong{font-size:16px;color:#2a3d7b;}
+        .time{font-weight:700;font-size:15px;}
+        .city{color:#555;font-size:13px;}
+        .status{font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;display:inline-block;}
+        .ok{background:#eaf7ee;color:#0d6a2b;border:1px solid #b8e7c8}
+        .warn{background:#fdecec;color:#8d1e1e;border:1px solid #f6c0c0}
+
+        .price{font-size:18px;font-weight:800;color:#2f52e6;margin-bottom:10px;}
+        .btn-book{
+            padding:10px 18px;border:0;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;
+            background:linear-gradient(180deg,#355cff,#2f52e6);color:#fff;box-shadow:0 4px 10px rgba(53,92,255,.3);
+        }
+        .btn-book:hover{transform:translateY(-1px)}
+        .empty{text-align:center;padding:30px;color:#5b6b8b;font-size:15px;}
+    </style>
+</head>
+<body>
+<header>
+    <div class="bar">
+        <div class="brand"><h1>Available Flights</h1></div>
+    </div>
+</header>
+
+<main id="flightList"></main>
+<div id="empty" class="empty" style="display:none">No flights available</div>
+
+<script>
+    // IMPORTANT: use Spring Boot port, not IntelliJ preview
+    const API_BASE = 'http://localhost:8080';
+
+    const list = document.getElementById('flightList');
+    const empty = document.getElementById('empty');
+
+    function splitDT(iso){
+        const d = new Date(iso);
+        if(!d || isNaN(d)) return {date:'—', time:'—'};
+        const pad = n => String(n).padStart(2,'0');
+        return {date:`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`, time:`${pad(d.getHours())}:${pad(d.getMinutes())}`};
+    }
+
+    function cardHTML(f){
+        const dep = splitDT(f.departure_time);
+        const arr = splitDT(f.arrival_time);
+        return `
+      <div class="card">
+        <div class="flight-info">
+          <div class="flight-row"><strong>${f.flight_number}</strong> — ${f.airline_name}</div>
+          <div class="flight-row">
+            <span class="time">${dep.time}</span> <span class="city">${f.departure_city}</span>
+            ➝
+            <span class="time">${arr.time}</span> <span class="city">${f.arrival_city}</span>
+          </div>
+          <div class="flight-row">Departure: ${dep.date} | Arrival: ${arr.date}</div>
+          <div><span class="status ${f.on_ground ? 'warn':'ok'}">${f.on_ground ? '🛬 On ground':'🛫 In air'}</span></div>
+        </div>
+        <div>
+          <div class="price">$${Math.floor(Math.random()*200 + 150)}</div>
+          <button class="btn-book" onclick="bookFlight(${f.id})">Book Flight</button>
+        </div>
+      </div>`;
+    }
+
+    async function loadFlights(){
+        try{
+            const res = await fetch(`${API_BASE}/api/flights`, {headers:{Accept:'application/json'}});
+            if(!res.ok) throw new Error("Load failed");
+            const data = await res.json();
+            if(!Array.isArray(data) || data.length===0){
+                list.innerHTML = ""; empty.style.display="block"; return;
+            }
+            empty.style.display="none";
+            list.innerHTML = data.map(cardHTML).join('');
+        }catch(e){
+            console.error(e); list.innerHTML=""; empty.style.display="block";
+        }
+    }
+
+    function bookFlight(id){
+        window.location.href = `Booking-flight.html?flightId=${id}`;
+    }
+
+    loadFlights();
+</script>
+</body>
+</html>

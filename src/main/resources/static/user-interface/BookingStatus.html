@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Status</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; background:#f4f7ff; margin:0; padding:0; }
+        header { width:100%; padding:1rem; background:#355cff; color:#fff; text-align:center; font-size:1.2rem; font-weight:bold; }
+        .container { display:flex; gap:20px; max-width:1200px; margin:20px auto; padding:0 20px; }
+        .details { flex:2; background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,.1); }
+        .payment { flex:1; background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,.1); height:fit-content; }
+        h2 { margin-top:0; color:#2a3d7b; }
+        table { width:100%; border-collapse: collapse; margin-top:15px; }
+        th, td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
+        th { background:#f0f3ff; color:#2a3d7b; }
+        .status { font-weight:bold; padding:5px 10px; border-radius:8px; display:inline-block; }
+        .Confirmed { background:#eaf7ee; color:#0d6a2b; border:1px solid #b8e7c8; }
+        button { margin:5px; padding:8px 15px; border:none; border-radius:6px; cursor:pointer; }
+        .edit { background:#ffa500; color:#fff; }
+        .delete { background:#d94848; color:#fff; }
+        .pay { background:#355cff; color:#fff; width:100%; margin-top:20px; padding:12px; font-size:1rem; }
+    </style>
+</head>
+<body>
+<header>Booking Status</header>
+
+<div class="container">
+    <!-- LEFT/MIDDLE: Booking + Tickets -->
+    <div class="details">
+        <h2>Booking Details</h2>
+        <p><strong>Booking ID:</strong> <span id="bookingId"></span></p>
+        <p><strong>Flight ID:</strong> <span id="flightId"></span></p>
+        <p><strong>Booking Date:</strong> <span id="bookingDate"></span></p>
+        <p><strong>Status:</strong> <span id="status" class="status"></span></p>
+
+        <h3>Tickets</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Seat</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Passport</th>
+                <th>NIC</th>
+                <th>Address</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="ticketList"></tbody>
+        </table>
+    </div>
+
+    <!-- RIGHT: Payment -->
+    <div class="payment">
+        <h2>Payment Summary</h2>
+        <p><strong>Base Price per Seat:</strong> $200</p>
+        <p><strong>Selected Seats:</strong> <span id="seatCount">0</span></p>
+        <p><strong>Total:</strong> $<span id="totalPrice">0</span></p>
+        <button class="pay">Continue to Payment</button>
+    </div>
+</div>
+
+<script>
+    const API_BASE = "http://localhost:8080/api/bookings";
+    const bookingId = new URLSearchParams(window.location.search).get("bookingId");
+
+    let bookingData = null;
+    const seatPrice = 200;
+
+    async function loadBooking(){
+        try {
+            const res = await fetch(`${API_BASE}/${bookingId}`);
+            if(!res.ok) throw new Error("Failed to load booking");
+            bookingData = await res.json();
+
+            document.getElementById("bookingId").textContent = bookingData.bookingId;
+            document.getElementById("flightId").textContent = bookingData.flightId;
+            document.getElementById("bookingDate").textContent = bookingData.bookingDate;
+            document.getElementById("status").textContent = bookingData.status;
+            document.getElementById("status").classList.add(bookingData.status);
+
+            renderTickets();
+            updatePayment();
+        } catch(err){
+            alert("Error loading booking status.");
+            console.error(err);
+        }
+    }
+
+    function renderTickets(){
+        const rows = bookingData.tickets.map(t => `
+      <tr>
+        <td>${t.seatId}</td>
+        <td>${t.passengerName}</td>
+        <td>${t.passengerEmail || "-"}</td>
+        <td>${t.passportId}</td>
+        <td>${t.nic}</td>
+        <td>${t.address}</td>
+        <td>
+          <button class="edit" onclick="window.location.href='EditTicket.html?bookingId=${bookingData.bookingId}&ticketId=${t.ticketId}'">Edit</button>
+          <button class="delete" onclick="deleteTicket(${t.ticketId})">Remove</button>
+        </td>
+      </tr>
+    `).join("");
+        document.getElementById("ticketList").innerHTML = rows;
+    }
+
+    function updatePayment(){
+        const count = bookingData.tickets.length;
+        document.getElementById("seatCount").textContent = count;
+        document.getElementById("totalPrice").textContent = count * seatPrice;
+    }
+
+    // --- Actions ---
+    function editTicket(ticketId){
+        const ticket = bookingData.tickets.find(t => t.ticketId === ticketId);
+        if(!ticket) return;
+
+        const newName = prompt("Edit Name:", ticket.passengerName);
+        const newEmail = prompt("Edit Email:", ticket.passengerEmail || "");
+        const newPassport = prompt("Edit Passport ID:", ticket.passportId);
+        const newNic = prompt("Edit NIC:", ticket.nic);
+        const newAddress = prompt("Edit Address:", ticket.address);
+
+        if(newName){
+            ticket.passengerName = newName;
+            ticket.passengerEmail = newEmail;
+            ticket.passportId = newPassport;
+            ticket.nic = newNic;
+            ticket.address = newAddress;
+            saveBooking();
+        }
+    }
+
+    async function deleteTicket(ticketId){
+        if(!confirm("Remove this ticket?")) return;
+        bookingData.tickets = bookingData.tickets.filter(t => t.ticketId !== ticketId);
+        await saveBooking();
+    }
+
+    async function saveBooking(){
+        const res = await fetch(`${API_BASE}/${bookingId}`, {
+            method:"PUT",
+            headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify(bookingData)
+        });
+        if(res.ok){
+            bookingData = await res.json();
+            renderTickets();
+            updatePayment();
+        } else {
+            alert("Update failed!");
+        }
+    }
+
+    loadBooking();
+</script>
+</body>
+</html>

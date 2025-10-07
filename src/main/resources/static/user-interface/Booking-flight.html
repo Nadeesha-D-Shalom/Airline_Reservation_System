@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Seat Selection</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; background:#f4f7ff; margin:0; padding:0; display:flex; flex-direction:column; align-items:center; }
+        header { width:100%; padding:1rem; background:#355cff; color:#fff; text-align:center; font-size:1.2rem; font-weight:bold; }
+        .plane { margin:20px; padding:20px; background:#fff; border-radius:14px; box-shadow:0 6px 18px rgba(19,35,75,.08); }
+        .row { display:flex; justify-content:center; margin:6px 0; }
+        .seat { width:35px; height:35px; margin:4px; border-radius:8px; background:#e6ebff; display:flex; justify-content:center; align-items:center; font-size:14px; cursor:pointer; font-weight:bold; color:#2a3d7b; }
+        .aisle { width:60px; }
+        .seat.business { background:#7aa2ff; color:#fff; }
+        .seat.selected { background:#16a34a; color:#fff; }
+        .seat.occupied { background:#d94848; color:#fff; cursor:not-allowed; }
+        #selectedSeats { margin:15px 0; font-weight:bold; }
+        form { margin-top:20px; background:#fff; padding:15px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,.1); width:90%; max-width:600px; display:none; }
+        label { display:block; margin-top:10px; font-weight:bold; }
+        input { width:100%; padding:8px; margin-top:5px; border:1px solid #ccc; border-radius:6px; }
+        button { margin-top:15px; padding:10px 20px; background:#355cff; border:none; color:#fff; border-radius:6px; font-size:1rem; cursor:pointer; }
+    </style>
+</head>
+<body>
+<header>Choose Your Seats</header>
+
+<div class="plane" id="plane"></div>
+
+<div id="selectedSeats">No seat selected</div>
+
+<form id="bookingForm">
+    <label>Booking Date:
+        <input type="date" id="bookingDate" required>
+    </label>
+    <div id="passengerFields"></div>
+    <button type="submit">Confirm Booking</button>
+</form>
+
+<script>
+    const API_BASE = "http://localhost:8080/api/bookings";
+    const userId = 1; // Replace with logged-in user
+    const flightId = new URLSearchParams(window.location.search).get("flightId") || 10;
+
+    const plane = document.getElementById("plane");
+    const selectedSeats = new Set();
+    const passengerFields = document.getElementById("passengerFields");
+    const bookingForm = document.getElementById("bookingForm");
+
+    const rows = 20;
+    const seatLetters = ["A","B","C","D","E","F"];
+    const occupiedSeats = ["1C","3D","7A"];
+
+    // Generate seat layout
+    for(let row=1; row<=rows; row++){
+        const rowDiv = document.createElement("div");
+        rowDiv.classList.add("row");
+
+        seatLetters.forEach((letter, idx)=>{
+            if(idx===3){
+                const aisle = document.createElement("div");
+                aisle.classList.add("aisle");
+                rowDiv.appendChild(aisle);
+            }
+
+            const seatId = row+letter;
+            const el = document.createElement("div");
+            el.classList.add("seat");
+            if(row<=3) el.classList.add("business");
+            el.textContent = letter;
+            el.dataset.id = seatId;
+
+            if(occupiedSeats.includes(seatId)){
+                el.classList.add("occupied");
+            }
+
+            el.addEventListener("click",()=>{
+                if(el.classList.contains("occupied")) return;
+                el.classList.toggle("selected");
+                if(el.classList.contains("selected")) selectedSeats.add(seatId);
+                else selectedSeats.delete(seatId);
+                updateSelection();
+            });
+
+            rowDiv.appendChild(el);
+        });
+
+        plane.appendChild(rowDiv);
+    }
+
+    function updateSelection(){
+        document.getElementById("selectedSeats").textContent =
+            selectedSeats.size>0 ? "Selected: "+[...selectedSeats].join(", ") : "No seat selected";
+
+        passengerFields.innerHTML = "";
+        if(selectedSeats.size>0){
+            bookingForm.style.display = "block";
+            [...selectedSeats].forEach(seat=>{
+                passengerFields.innerHTML += `
+          <fieldset style="margin-top:10px; border:1px solid #ddd; padding:10px; border-radius:8px;">
+            <legend>Passenger for ${seat}</legend>
+            <input type="text" name="name-${seat}" placeholder="Full Name" required>
+            <input type="email" name="email-${seat}" placeholder="Email">
+            <input type="text" name="passport-${seat}" placeholder="Passport ID" required>
+            <input type="text" name="nic-${seat}" placeholder="NIC" required>
+            <input type="text" name="address-${seat}" placeholder="Address" required>
+          </fieldset>`;
+            });
+        } else {
+            bookingForm.style.display = "none";
+        }
+    }
+
+    document.getElementById("bookingDate").value = new Date().toISOString().split("T")[0];
+
+    bookingForm.onsubmit = async e => {
+        e.preventDefault();
+
+        const tickets = [...selectedSeats].map(seat=>{
+            return {
+                seatId: seat,
+                passengerName: e.target[`name-${seat}`].value,
+                passengerEmail: e.target[`email-${seat}`].value,
+                passportId: e.target[`passport-${seat}`].value,
+                nic: e.target[`nic-${seat}`].value,
+                address: e.target[`address-${seat}`].value
+            };
+        });
+
+        const booking = {
+            userId: userId,
+            flightId: flightId,
+            bookingDate: document.getElementById("bookingDate").value,
+            status: "Confirmed",
+            tickets: tickets
+        };
+
+        const res = await fetch(API_BASE, {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify(booking)
+        });
+
+        if(res.ok){
+            const data = await res.json();
+            window.location.href = `BookingStatus.html?bookingId=${data.bookingId}`;
+        } else {
+            alert("Booking failed!");
+        }
+    };
+</script>
+</body>
+</html>

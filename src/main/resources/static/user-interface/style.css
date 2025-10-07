@@ -1,0 +1,131 @@
+/* Reset + base */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #f4f7ff;
+    color: #0e1726;
+    line-height: 1.5;
+}
+
+/* Header */
+header {
+    background: #355cff;
+    color: #fff;
+    text-align: center;
+    padding: 1rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+/* Container */
+.container {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+/* Cards & panels */
+.panel {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 6px 18px rgba(19,35,75,.08);
+    margin-bottom: 20px;
+}
+
+/* Buttons */
+button, .btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+button:hover, .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+.btn-primary { background:#355cff; color:#fff; }
+.btn-success { background:#16a34a; color:#fff; }
+.btn-danger { background:#d94848; color:#fff; }
+.btn-warning { background:#f59e0b; color:#fff; }
+
+/* Seat map */
+.plane {
+    position: relative;
+    width: 95%;
+    max-width: 900px;
+    margin: 20px auto;
+    min-height: 200px;
+    border: 1px solid #e6ebff;
+    border-radius: 10px;
+    background: #fff url('plane-bg.png') no-repeat center/cover;
+    padding: 30px;
+}
+.seat {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    background:#e6ebff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 12px;
+    font-weight: 600;
+    cursor:pointer;
+    transition:.2s;
+}
+.seat.selected { background:#16a34a; color:#fff; }
+.seat.occupied { background:#d94848; color:#fff; cursor:not-allowed; }
+.seat.business { background:#7aa2ff; color:#fff; }
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+th, td {
+    border: 1px solid #e6ebff;
+    padding: 12px;
+    text-align: center;
+    font-size: 14px;
+}
+th {
+    background: #e6ebff;
+    font-weight: 700;
+}
+tr:nth-child(even) { background: #f9faff; }
+
+/* Info text */
+.status {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 999px;
+}
+.status.confirmed { background:#eaf7ee; color:#0d6a2b; }
+.status.cancelled { background:#fdecec; color:#8d1e1e; }
+
+/* Links */
+a {
+    text-decoration: none;
+    color: #355cff;
+    font-weight: 600;
+}
+a:hover { text-decoration: underline; }
+
+/* Messages */
+.message {
+    margin: 15px 0;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+.message.success { background:#eaf7ee; color:#0d6a2b; }
+.message.error { background:#fdecec; color:#8d1e1e; }
