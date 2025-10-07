@@ -17,21 +17,6 @@ The system is **secure, efficient, and user-friendly**, designed to reduce manua
 
 ---
 
-## 👥 Team Information
-
-**Group ID:** 2025-Y2-S1-MLB-B9G1-01
-
-| Name                   | Student ID |
-| ---------------------- | ---------- |
-| Chedima Imashi K.H.    | IT24102218 |
-| Palliyage D.S.R.       | IT24102226 |
-| Dias M.B.N.S.          | IT24102244 |
-| Pataka Ralalage A.N.H. | IT24102321 |
-| Vidushan K.G.A.D.      | IT24102189 |
-| Pehesara A.D.          | IT24102305 |
-
----
-
 ## ✨ Key Features
 
 ### 👤 Passenger & Staff Profiles
