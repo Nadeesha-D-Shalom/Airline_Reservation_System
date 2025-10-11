@@ -41,6 +41,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public boolean emailExists(String email) {
+        return userRepo.findByEmail(email).isPresent() || adminRepo.findByEmail(email).isPresent();
+    }
+
+
+    @Override
     @Transactional
     public Account register(Account account) {
 

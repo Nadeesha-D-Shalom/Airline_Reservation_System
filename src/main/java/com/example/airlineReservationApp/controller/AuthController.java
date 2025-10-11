@@ -1,33 +1,42 @@
 package com.example.airlineReservationApp.controller;
 
-import com.example.airlineReservationApp.model.*;
+import com.example.airlineReservationApp.dto.AuthRequest;
+import com.example.airlineReservationApp.dto.AuthResponse;
+import com.example.airlineReservationApp.model.UserEntity;
+import com.example.airlineReservationApp.model.Account;
 import com.example.airlineReservationApp.service.AuthService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin
+@CrossOrigin(origins = "*")
 public class AuthController {
 
     private final AuthService authService;
-    public AuthController(AuthService authService) { this.authService = authService; }
 
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
+
+    //  Register endpoint for normal users
     @PostMapping("/register")
-    public Account register(@RequestBody UserEntity user) {
-        return authService.register(user);
+    public ResponseEntity<?> register(@RequestBody UserEntity user) {
+        if (authService.emailExists(user.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("{\"error\":\"Email already exists\"}");
+        }
+
+        Account registered = authService.register(user);
+        return ResponseEntity.ok("{\"message\":\"Registration successful for " + registered.getEmail() + "\"}");
     }
 
+    //  Login endpoint for both user and admin
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest req) {
-        return authService.login(req.getEmail(), req.getPassword());
-    }
-
-    static class LoginRequest {
-        private String email;
-        private String password;
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+        String token = authService.login(request.getEmail(), request.getPassword());
+        AuthResponse response = new AuthResponse(token, "USER_OR_ADMIN");
+        return ResponseEntity.ok(response);
     }
 }
