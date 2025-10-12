@@ -2,5 +2,8 @@ package com.example.airlineReservationApp.repository;
 
 import com.example.airlineReservationApp.model.Ticket;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface TicketRepository extends JpaRepository<Ticket, Long> { }
+@Repository
+public interface TicketRepository extends JpaRepository<Ticket, Long> {
+}
