@@ -4,6 +4,7 @@ import com.example.airlineReservationApp.dto.AuthResponse;
 import com.example.airlineReservationApp.dto.RegisterRequest;
 import com.example.airlineReservationApp.model.Account;
 import com.example.airlineReservationApp.model.UserEntity;
+<<<<<<< HEAD
 import com.example.airlineReservationApp.repository.AccountRepository;
 import com.example.airlineReservationApp.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -83,4 +84,13 @@ public class AuthService {
         // Return token + role
         return new AuthResponse(token, account.getRole());
     }
+=======
+import com.example.airlineReservationApp.dto.AuthRequest;
+import com.example.airlineReservationApp.dto.AuthResponse;
+
+public interface AuthService {
+    boolean emailExists(String email);
+    Account register(Account account);
+    String login(String email, String password);
+>>>>>>> 4a26394 (Version 1.8.1)
 }

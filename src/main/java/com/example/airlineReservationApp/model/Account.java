@@ -1,5 +1,6 @@
 package com.example.airlineReservationApp.model;
 
+<<<<<<< HEAD
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,4 +27,16 @@ public class Account {
 
     @Column(nullable = false)
     private String role; // USER or ADMIN
+=======
+public interface Account {
+    String getEmail();
+    String getPassword();
+
+    // return the enum type instead of String
+    BaseUser.Role getRole();
+
+    default String getRoleEnum() {
+        return getRole().name();
+    }
+>>>>>>> 4a26394 (Version 1.8.1)
 }
