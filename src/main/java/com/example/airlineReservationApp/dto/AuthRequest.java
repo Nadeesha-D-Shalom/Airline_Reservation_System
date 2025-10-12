@@ -1,6 +1,7 @@
 package com.example.airlineReservationApp.dto;
 
 public class AuthRequest {
+
     private String email;
     private String password;
 

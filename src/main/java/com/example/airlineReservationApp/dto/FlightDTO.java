@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 public class FlightDTO {
 
-    private Integer id;
+    private Long id;
 
     @JsonProperty("flight_number")
     private String flightNumber;
@@ -17,7 +17,7 @@ public class FlightDTO {
     @JsonProperty("country_of_register")
     private String countryOfRegister;
 
-    @JsonProperty("aircraft_AGE")
+    @JsonProperty("aircraft_age")
     private int aircraftAge;
 
     @JsonProperty("serial_number")
@@ -43,7 +43,7 @@ public class FlightDTO {
 
     public FlightDTO() {}
 
-    public FlightDTO(Integer id,
+    public FlightDTO(Long id,
                      String flightNumber,
                      String aircraftType,
                      String countryOfRegister,
@@ -73,22 +73,22 @@ public class FlightDTO {
         if (f == null) return null;
         return new FlightDTO(
                 f.getId(),
-                f.getFlight_number(),
-                f.getAircraft_type(),
-                f.getCountry_of_register(),
-                f.getAircraft_AGE(),
-                f.getSerial_number(),
-                f.getAirline_name(),
-                f.getDeparture_city(),
-                f.getArrival_city(),
-                f.getDeparture_time(),
-                f.getArrival_time(),
-                f.isOn_ground()
+                f.getFlightNumber(),
+                f.getAircraftType(),
+                f.getCountryOfRegister(),
+                f.getAircraftAge(),
+                f.getSerialNumber(),
+                f.getAirlineName(),
+                f.getDepartureCity(),
+                f.getArrivalCity(),
+                f.getDepartureTime(),
+                f.getArrivalTime(),
+                f.isOnGround()
         );
     }
 
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public String getFlightNumber() { return flightNumber; }
     public void setFlightNumber(String flightNumber) { this.flightNumber = flightNumber; }

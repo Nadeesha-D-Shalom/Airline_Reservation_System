@@ -1,61 +1,75 @@
 package com.example.airlineReservationApp.controller;
 
+import com.example.airlineReservationApp.dto.BookingRequest;
 import com.example.airlineReservationApp.model.Booking;
-import com.example.airlineReservationApp.repository.BookingRepository;
-import org.springframework.http.ResponseEntity;
+import com.example.airlineReservationApp.model.Passenger;
+import com.example.airlineReservationApp.service.BookingService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
+@CrossOrigin(origins = "http://localhost:5173")
 public class BookingController {
 
-    private final BookingRepository bookingRepository;
+    private final BookingService bookingService;
 
-    public BookingController(BookingRepository bookingRepository) {
-        this.bookingRepository = bookingRepository;
+    public BookingController(BookingService bookingService) {
+        this.bookingService = bookingService;
+    }
+
+    @PostMapping
+    public Booking createBooking(@RequestBody BookingRequest request) {
+        if (request.getPassengers() == null || request.getPassengers().isEmpty()) {
+            throw new IllegalArgumentException("Passenger details required");
+        }
+
+        BookingRequest.PassengerPayload p = request.getPassengers().get(0);
+
+        Passenger passenger = new Passenger();
+        passenger.setFullName(p.getFullName());
+        passenger.setDob(p.getDob());
+        passenger.setGender(p.getGender());
+        passenger.setNationality(p.getNationality());
+        passenger.setEmail(p.getEmail());
+        passenger.setPhone(p.getPhone());
+        passenger.setPassport(p.getPassport());
+        passenger.setFlyerNumber(p.getFlyerNumber());
+        passenger.setAssistance(p.getAssistance());
+        passenger.setDietary(p.getDietary());
+        passenger.setInsurance(p.isInsurance());
+        passenger.setBaggage(p.getBaggage());
+        passenger.setEmergencyName(p.getEmergencyName());
+        passenger.setEmergencyPhone(p.getEmergencyPhone());
+
+        return bookingService.createBooking(
+                request.getFlightId(),
+                passenger,
+                request.getTotalAmount(),
+                p.getSeat(),
+                request.getTransactionId(),
+                request.getStatus()
+        );
     }
 
     @GetMapping
     public List<Booking> getAllBookings() {
-        return bookingRepository.findAll();
+        return bookingService.getAllBookings();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Booking> getBookingById(@PathVariable Long id) {
-        return bookingRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PostMapping
-    public Booking createBooking(@RequestBody Booking booking) {
-        booking.getTickets().forEach(t -> t.setBooking(booking));
-        return bookingRepository.save(booking);
+    public Booking getBookingById(@PathVariable Long id) {
+        return bookingService.getBookingById(id);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Booking> updateBooking(@PathVariable Long id, @RequestBody Booking updatedBooking) {
-        return bookingRepository.findById(id).map(b -> {
-            b.setUserId(updatedBooking.getUserId());
-            b.setFlightId(updatedBooking.getFlightId());
-            b.setBookingDate(updatedBooking.getBookingDate());
-            b.setStatus(updatedBooking.getStatus());
-            b.getTickets().clear();
-            updatedBooking.getTickets().forEach(t -> {
-                t.setBooking(b);
-                b.getTickets().add(t);
-            });
-            return ResponseEntity.ok(bookingRepository.save(b));
-        }).orElse(ResponseEntity.notFound().build());
+    public Booking updateBooking(@PathVariable Long id, @RequestBody Booking booking) {
+        return bookingService.updateBooking(id, booking);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
-        return bookingRepository.findById(id).map(b -> {
-            bookingRepository.delete(b);
-            return ResponseEntity.ok().<Void>build();
-        }).orElse(ResponseEntity.notFound().build());
+    public void deleteBooking(@PathVariable Long id) {
+        bookingService.deleteBooking(id);
     }
 }

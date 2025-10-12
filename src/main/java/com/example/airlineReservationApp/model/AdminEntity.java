@@ -1,16 +1,31 @@
 package com.example.airlineReservationApp.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "admins")
-public class AdminEntity extends BaseUser {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class AdminEntity {
 
-    @Column(name = "department")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
+
     private String department;
 
-    public String getDepartment() { return department; }
-    public void setDepartment(String department) { this.department = department; }
+    @Column(nullable = false)
+    private String role = "ADMIN";  // Fixed: use string instead of Role enum
 }

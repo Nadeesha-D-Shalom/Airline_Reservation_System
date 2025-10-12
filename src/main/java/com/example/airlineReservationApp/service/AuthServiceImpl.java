@@ -1,59 +1,46 @@
 package com.example.airlineReservationApp.service;
 
-import com.example.airlineReservationApp.model.*;
-import com.example.airlineReservationApp.repository.AdminRepository;
-import com.example.airlineReservationApp.repository.UserRepository;
-import jakarta.transaction.Transactional;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import com.example.airlineReservationApp.dto.AuthResponse;
+import com.example.airlineReservationApp.model.Account;
+import com.example.airlineReservationApp.repository.AccountRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    private final UserRepository userRepo;
-    private final AdminRepository adminRepo;
+    private final AccountRepository accountRepository;
+    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final PasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    public AuthServiceImpl(UserRepository userRepo, AdminRepository adminRepo, JwtService jwtService) {
-        this.userRepo = userRepo;
-        this.adminRepo = adminRepo;
+    public AuthServiceImpl(AccountRepository accountRepository,
+                           PasswordEncoder passwordEncoder,
+                           JwtService jwtService) {
+        this.accountRepository = accountRepository;
+        this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
     }
 
     @Override
-    public boolean emailExists(String email) {
-        return userRepo.findByEmail(email).isPresent() || adminRepo.findByEmail(email).isPresent();
-    }
-
-    @Override
-    @Transactional
     public Account register(Account account) {
-        if (account instanceof UserEntity user) {
-            user.setPassword(encoder.encode(user.getPassword()));
-            user.setRole(BaseUser.Role.USER);
-            return userRepo.save(user);
+        if (accountRepository.existsByEmail(account.getEmail())) {
+            throw new RuntimeException("Email already registered");
         }
-        if (account instanceof AdminEntity admin) {
-            admin.setPassword(encoder.encode(admin.getPassword()));
-            admin.setRole(BaseUser.Role.ADMIN);
-            return adminRepo.save(admin);
+        account.setPassword(passwordEncoder.encode(account.getPassword()));
+        if (account.getRole() == null || account.getRole().isBlank()) {
+            account.setRole("USER");
         }
-        throw new RuntimeException("Unsupported account type");
+        return accountRepository.save(account);
     }
 
     @Override
-    public String login(String email, String password) {
-        Account account = userRepo.findByEmail(email)
-                .map(u -> (Account) u)
-                .or(() -> adminRepo.findByEmail(email).map(a -> (Account) a))
-                .orElseThrow(() -> new RuntimeException("Account not found"));
-
-        if (!encoder.matches(password, account.getPassword())) {
+    public AuthResponse login(String email, String password) {
+        var user = accountRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
-
-        return jwtService.generateToken(account);
+        String token = jwtService.generateToken(user);
+        return new AuthResponse(token, user.getRole());
     }
 }
