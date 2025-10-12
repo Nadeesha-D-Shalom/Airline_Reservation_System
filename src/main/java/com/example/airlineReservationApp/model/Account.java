@@ -1,13 +1,29 @@
 package com.example.airlineReservationApp.model;
 
-public interface Account {
-    String getEmail();
-    String getPassword();
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    // return the enum type instead of String
-    BaseUser.Role getRole();
+@Entity
+@Table(name = "account")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Account {
 
-    default String getRoleEnum() {
-        return getRole().name();
-    }
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String fullName;
+
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false)
+    private String role; // USER or ADMIN
 }

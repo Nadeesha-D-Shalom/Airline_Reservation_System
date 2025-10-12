@@ -1,24 +1,30 @@
 package com.example.airlineReservationApp.controller;
 
 import com.example.airlineReservationApp.model.AdminEntity;
-import com.example.airlineReservationApp.service.AuthService;
+import com.example.airlineReservationApp.repository.AdminRepository;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin")
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:5173")
 public class AdminController {
 
-    private final AuthService authService;
+    private final AdminRepository adminRepository;
 
-    public AdminController(AuthService authService) {
-        this.authService = authService;
+    public AdminController(AdminRepository adminRepository) {
+        this.adminRepository = adminRepository;
     }
 
-    // Only admin can register another admin
     @PostMapping("/register")
     public AdminEntity registerAdmin(@RequestBody AdminEntity admin) {
-        admin.setRole(AdminEntity.Role.ADMIN);
-        return (AdminEntity) authService.register(admin);
+        admin.setRole("ADMIN");  // Fixed: directly assign "ADMIN"
+        return adminRepository.save(admin);
+    }
+
+    @GetMapping("/all")
+    public List<AdminEntity> getAllAdmins() {
+        return adminRepository.findAll();
     }
 }

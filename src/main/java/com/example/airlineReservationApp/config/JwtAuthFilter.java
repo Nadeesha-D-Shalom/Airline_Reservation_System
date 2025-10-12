@@ -1,7 +1,8 @@
 package com.example.airlineReservationApp.config;
 
+import com.example.airlineReservationApp.model.Account;
+import com.example.airlineReservationApp.service.AccountService;
 import com.example.airlineReservationApp.service.JwtService;
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,49 +15,51 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final AccountService accountService;
 
-    public JwtAuthFilter(JwtService jwtService) {
+    public JwtAuthFilter(JwtService jwtService, AccountService accountService) {
         this.jwtService = jwtService;
+        this.accountService = accountService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
+                                    FilterChain chain) throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
-
+        String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
+            chain.doFilter(request, response);
             return;
         }
 
-        final String token = authHeader.substring(7);
+        String token = authHeader.substring(7);
+        String email = jwtService.extractEmail(token);
 
-        // Validate and extract claims from the token
-        if (jwtService.validateToken(token)) {
-            Claims claims = jwtService.extractAllClaims(token);
-            String email = claims.getSubject();
-            String role = claims.get("role", String.class);
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            Account account = null;
+            try {
+                account = accountService.getByEmail(email);
+            } catch (RuntimeException ignored) { }
 
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(
-                            new User(email, "", Collections.emptyList()),
-                            null,
-                            Collections.emptyList()
-                    );
-
-            auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(auth);
+            if (account != null && jwtService.validateToken(token, email)) {
+                var userDetails = User.builder()
+                        .username(account.getEmail())
+                        .password(account.getPassword())
+                        .roles(account.getRole())
+                        .build();
+                var authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities()
+                );
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
         }
-
-        filterChain.doFilter(request, response);
+        chain.doFilter(request, response);
     }
 }
