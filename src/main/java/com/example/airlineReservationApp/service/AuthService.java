@@ -1,15 +1,12 @@
 package com.example.airlineReservationApp.service;
 
 import com.example.airlineReservationApp.model.Account;
+import com.example.airlineReservationApp.model.UserEntity;
+import com.example.airlineReservationApp.dto.AuthRequest;
+import com.example.airlineReservationApp.dto.AuthResponse;
 
 public interface AuthService {
-
-    // Handles both User and Admin login
-    String login(String email, String password);
-
-    // Unified registration for both UserEntity and AdminEntity (via Account interface)
-    Account register(Account account);
-
-    // Checks whether email exists in User or Admin table
     boolean emailExists(String email);
+    Account register(Account account);
+    String login(String email, String password);
 }
