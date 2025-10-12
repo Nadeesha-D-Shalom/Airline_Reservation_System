@@ -1,33 +1,40 @@
 package com.example.airlineReservationApp.controller;
 
-import com.example.airlineReservationApp.model.*;
+import com.example.airlineReservationApp.dto.AuthRequest;
+import com.example.airlineReservationApp.dto.AuthResponse;
+import com.example.airlineReservationApp.model.UserEntity;
 import com.example.airlineReservationApp.service.AuthService;
+import com.example.airlineReservationApp.service.JwtService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin
+@CrossOrigin(origins = "*")
 public class AuthController {
 
     private final AuthService authService;
-    public AuthController(AuthService authService) { this.authService = authService; }
+    private final JwtService jwtService;
+
+    public AuthController(AuthService authService, JwtService jwtService) {
+        this.authService = authService;
+        this.jwtService = jwtService;
+    }
 
     @PostMapping("/register")
-    public Account register(@RequestBody UserEntity user) {
-        return authService.register(user);
+    public ResponseEntity<?> register(@RequestBody UserEntity user) {
+        if (authService.emailExists(user.getEmail())) {
+            return ResponseEntity.badRequest().body("{\"error\":\"Email already exists\"}");
+        }
+
+        authService.register(user);
+        return ResponseEntity.ok("{\"message\":\"Registration successful\"}");
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest req) {
-        return authService.login(req.getEmail(), req.getPassword());
-    }
-
-    static class LoginRequest {
-        private String email;
-        private String password;
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+        String token = authService.login(request.getEmail(), request.getPassword());
+        String role = jwtService.extractRole(token);
+        return ResponseEntity.ok(new AuthResponse(token, role));
     }
 }
