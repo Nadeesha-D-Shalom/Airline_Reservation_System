@@ -17,15 +17,15 @@ public class Ticket {
     private Long id;
 
     private String ticketNumber;
-    private double price;
     private String seatNumber;
+
+    @Column(nullable = false)
+    private double price;
+
     private String status;
 
-    @ManyToOne
-    @JoinColumn(name = "booking_id")
+    // Ticket is the owning side of the relationship
+    @OneToOne
+    @JoinColumn(name = "booking_id", referencedColumnName = "id")
     private Booking booking;
-
-    public void setBooking(Booking booking) {
-        this.booking = booking;
-    }
 }

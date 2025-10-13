@@ -30,6 +30,4 @@ public class Passenger {
     private String baggage;
     private String emergencyName;
     private String emergencyPhone;
-
-
 }

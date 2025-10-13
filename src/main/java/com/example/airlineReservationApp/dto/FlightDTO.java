@@ -43,18 +43,10 @@ public class FlightDTO {
 
     public FlightDTO() {}
 
-    public FlightDTO(Long id,
-                     String flightNumber,
-                     String aircraftType,
-                     String countryOfRegister,
-                     int aircraftAge,
-                     String serialNumber,
-                     String airlineName,
-                     String departureCity,
-                     String arrivalCity,
-                     LocalDateTime departureTime,
-                     LocalDateTime arrivalTime,
-                     boolean onGround) {
+    public FlightDTO(Long id, String flightNumber, String aircraftType, String countryOfRegister,
+                     int aircraftAge, String serialNumber, String airlineName,
+                     String departureCity, String arrivalCity,
+                     LocalDateTime departureTime, LocalDateTime arrivalTime, boolean onGround) {
         this.id = id;
         this.flightNumber = flightNumber;
         this.aircraftType = aircraftType;
@@ -69,6 +61,7 @@ public class FlightDTO {
         this.onGround = onGround;
     }
 
+    // ✅ Convert Entity → DTO
     public static FlightDTO fromEntity(Flight f) {
         if (f == null) return null;
         return new FlightDTO(
@@ -87,39 +80,117 @@ public class FlightDTO {
         );
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    //  Convert DTO → Entity
+    public Flight toEntity() {
+        Flight f = new Flight();
+        f.setId(this.id);
+        f.setFlightNumber(this.flightNumber);
+        f.setAircraftType(this.aircraftType);
+        f.setCountryOfRegister(this.countryOfRegister);
+        f.setAircraftAge(this.aircraftAge);
+        f.setSerialNumber(this.serialNumber);
+        f.setAirlineName(this.airlineName);
+        f.setDepartureCity(this.departureCity);
+        f.setArrivalCity(this.arrivalCity);
+        f.setDepartureTime(this.departureTime);
+        f.setArrivalTime(this.arrivalTime);
+        f.setOnGround(this.onGround);
+        return f;
+    }
 
-    public String getFlightNumber() { return flightNumber; }
-    public void setFlightNumber(String flightNumber) { this.flightNumber = flightNumber; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getAircraftType() { return aircraftType; }
-    public void setAircraftType(String aircraftType) { this.aircraftType = aircraftType; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getCountryOfRegister() { return countryOfRegister; }
-    public void setCountryOfRegister(String countryOfRegister) { this.countryOfRegister = countryOfRegister; }
+    public String getFlightNumber() {
+        return flightNumber;
+    }
 
-    public int getAircraftAge() { return aircraftAge; }
-    public void setAircraftAge(int aircraftAge) { this.aircraftAge = aircraftAge; }
+    public void setFlightNumber(String flightNumber) {
+        this.flightNumber = flightNumber;
+    }
 
-    public String getSerialNumber() { return serialNumber; }
-    public void setSerialNumber(String serialNumber) { this.serialNumber = serialNumber; }
+    public String getAircraftType() {
+        return aircraftType;
+    }
 
-    public String getAirlineName() { return airlineName; }
-    public void setAirlineName(String airlineName) { this.airlineName = airlineName; }
+    public void setAircraftType(String aircraftType) {
+        this.aircraftType = aircraftType;
+    }
 
-    public String getDepartureCity() { return departureCity; }
-    public void setDepartureCity(String departureCity) { this.departureCity = departureCity; }
+    public String getCountryOfRegister() {
+        return countryOfRegister;
+    }
 
-    public String getArrivalCity() { return arrivalCity; }
-    public void setArrivalCity(String arrivalCity) { this.arrivalCity = arrivalCity; }
+    public void setCountryOfRegister(String countryOfRegister) {
+        this.countryOfRegister = countryOfRegister;
+    }
 
-    public LocalDateTime getDepartureTime() { return departureTime; }
-    public void setDepartureTime(LocalDateTime departureTime) { this.departureTime = departureTime; }
+    public int getAircraftAge() {
+        return aircraftAge;
+    }
 
-    public LocalDateTime getArrivalTime() { return arrivalTime; }
-    public void setArrivalTime(LocalDateTime arrivalTime) { this.arrivalTime = arrivalTime; }
+    public void setAircraftAge(int aircraftAge) {
+        this.aircraftAge = aircraftAge;
+    }
 
-    public boolean isOnGround() { return onGround; }
-    public void setOnGround(boolean onGround) { this.onGround = onGround; }
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
+    }
+
+    public String getAirlineName() {
+        return airlineName;
+    }
+
+    public void setAirlineName(String airlineName) {
+        this.airlineName = airlineName;
+    }
+
+    public String getDepartureCity() {
+        return departureCity;
+    }
+
+    public void setDepartureCity(String departureCity) {
+        this.departureCity = departureCity;
+    }
+
+    public String getArrivalCity() {
+        return arrivalCity;
+    }
+
+    public void setArrivalCity(String arrivalCity) {
+        this.arrivalCity = arrivalCity;
+    }
+
+    public LocalDateTime getDepartureTime() {
+        return departureTime;
+    }
+
+    public void setDepartureTime(LocalDateTime departureTime) {
+        this.departureTime = departureTime;
+    }
+
+    public LocalDateTime getArrivalTime() {
+        return arrivalTime;
+    }
+
+    public void setArrivalTime(LocalDateTime arrivalTime) {
+        this.arrivalTime = arrivalTime;
+    }
+
+    public boolean isOnGround() {
+        return onGround;
+    }
+
+    public void setOnGround(boolean onGround) {
+        this.onGround = onGround;
+    }
 }
