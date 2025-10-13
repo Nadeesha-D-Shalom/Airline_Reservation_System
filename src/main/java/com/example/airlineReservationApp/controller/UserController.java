@@ -17,10 +17,7 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
-<<<<<<< HEAD
     //  Get user profile by email
-=======
->>>>>>> ac6aa17 (Version 1.9.1)
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile(@RequestParam String email) {
         Optional<UserEntity> userOpt = userRepository.findByEmail(email);
@@ -29,7 +26,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
-<<<<<<< HEAD
         return ResponseEntity.ok(userOpt.get());
     }
 
@@ -74,9 +70,4 @@ public class UserController {
         userRepository.save(existingUser);
         return ResponseEntity.ok(existingUser);
     }
-=======
-        // Return actual user data (not wrapped in Optional)
-        return ResponseEntity.ok(userOpt.get());
-    }
->>>>>>> ac6aa17 (Version 1.9.1)
 }

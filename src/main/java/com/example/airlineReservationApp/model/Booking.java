@@ -28,14 +28,14 @@ public class Booking {
     @JoinColumn(name = "passenger_id")
     private Passenger passenger;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "ticket_id", referencedColumnName = "id")
+    //  Booking is not the owner; Ticket owns it
+    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     private Ticket ticket;
 
-    private String status; // CONFIRMED, CANCELLED, PENDING
-
+    private String status;
     private String transactionId;
 
+    // Helper method to set both sides
     public void addTicket(Ticket ticket) {
         this.ticket = ticket;
         ticket.setBooking(this);
