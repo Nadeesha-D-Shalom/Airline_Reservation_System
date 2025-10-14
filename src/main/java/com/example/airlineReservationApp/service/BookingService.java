@@ -9,6 +9,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @Service
 public class BookingService {
 
@@ -16,18 +18,21 @@ public class BookingService {
     private final FlightRepository flightRepository;
     private final PassengerRepository passengerRepository;
     private final TicketRepository ticketRepository;
+    private final JwtService jwtService;
 
     public BookingService(BookingRepository bookingRepository,
                           FlightRepository flightRepository,
                           PassengerRepository passengerRepository,
-                          TicketRepository ticketRepository) {
+                          TicketRepository ticketRepository,
+                          JwtService jwtService) {
         this.bookingRepository = bookingRepository;
         this.flightRepository = flightRepository;
         this.passengerRepository = passengerRepository;
         this.ticketRepository = ticketRepository;
+        this.jwtService = jwtService;
     }
 
-    // Create new booking with linked passenger, flight, and ticket
+    // Create new booking
     public Booking createBooking(Long flightId,
                                  Passenger passenger,
                                  double totalAmount,
@@ -35,21 +40,17 @@ public class BookingService {
                                  String transactionId,
                                  String status) {
 
-        // Find the flight
         Flight flight = flightRepository.findById(flightId)
                 .orElseThrow(() -> new RuntimeException("Flight not found"));
 
-        //  Save passenger first
         passengerRepository.save(passenger);
 
-        // Create ticket
         Ticket ticket = new Ticket();
         ticket.setSeatNumber(seatNumber);
         ticket.setPrice(totalAmount);
         ticket.setStatus(status != null ? status : "PAID");
         ticket.setTicketNumber("TCK-" + System.currentTimeMillis());
 
-        //  Create booking
         Booking booking = new Booking();
         booking.setBookingDate(LocalDate.now());
         booking.setFlight(flight);
@@ -57,58 +58,53 @@ public class BookingService {
         booking.setTransactionId(transactionId);
         booking.setStatus("CONFIRMED");
 
-        //  Link both sides properly
         booking.addTicket(ticket);
-
-        //  Save booking first
-        Booking savedBooking = bookingRepository.save(booking);
-
-        //  Save ticket after linking back the booking_id
-        ticket.setBooking(savedBooking);
+        Booking saved = bookingRepository.save(booking);
+        ticket.setBooking(saved);
         ticketRepository.save(ticket);
 
-        return savedBooking;
+        return saved;
     }
 
-    //  Get all bookings
-    public List<Booking> getAllBookings() {
-        return bookingRepository.findAll();
-    }
-
-    // Get single booking by ID
-    public Booking getBookingById(Long id) {
-        return bookingRepository.findById(id).orElse(null);
-    }
-
-    //  Update booking info
-    public Booking updateBooking(Long id, Booking updated) {
-        Booking booking = bookingRepository.findById(id).orElse(null);
-        if (booking == null) return null;
-        booking.setStatus(updated.getStatus());
-        booking.setTransactionId(updated.getTransactionId());
-        return bookingRepository.save(booking);
-    }
-
-    // Delete booking
-    public void deleteBooking(Long id) {
-        bookingRepository.deleteById(id);
-    }
-
-    //  Get all booking details with flight + passenger + ticket info
+    // All bookings (for admin)
     public List<BookingDetailsDTO> getAllBookingDetails() {
         List<Booking> bookings = bookingRepository.findAll();
-        List<BookingDetailsDTO> details = new ArrayList<>();
+        return mapToBookingDetailsDTO(bookings);
+    }
+
+    // Bookings filtered by user email
+    public List<BookingDetailsDTO> getBookingsByUserEmail(String email) {
+        List<Booking> bookings = bookingRepository.findAll();
+        List<Booking> userBookings = new ArrayList<>();
+
+        for (Booking b : bookings) {
+            if (b.getPassenger() != null &&
+                    b.getPassenger().getEmail() != null &&
+                    b.getPassenger().getEmail().equalsIgnoreCase(email)) {
+                userBookings.add(b);
+            }
+        }
+
+        return mapToBookingDetailsDTO(userBookings);
+    }
+
+    //  Optional: If JWT version used
+    public List<BookingDetailsDTO> getBookingsForCurrentUser(HttpServletRequest request) {
+        String email = jwtService.extractEmailFromToken(request);
+        return getBookingsByUserEmail(email);
+    }
+
+    // Shared DTO Mapper
+    private List<BookingDetailsDTO> mapToBookingDetailsDTO(List<Booking> bookings) {
+        List<BookingDetailsDTO> list = new ArrayList<>();
 
         for (Booking booking : bookings) {
             BookingDetailsDTO dto = new BookingDetailsDTO();
-
-            // --- Booking Info ---
             dto.setBookingId(booking.getId());
             dto.setBookingDate(booking.getBookingDate() != null ? booking.getBookingDate().toString() : null);
             dto.setTransactionId(booking.getTransactionId());
             dto.setBookingStatus(booking.getStatus());
 
-            // --- Passenger Info ---
             if (booking.getPassenger() != null) {
                 dto.setPassengerName(booking.getPassenger().getFullName());
                 dto.setEmail(booking.getPassenger().getEmail());
@@ -117,32 +113,42 @@ public class BookingService {
                 dto.setPassport(booking.getPassenger().getPassport());
             }
 
-            // --- Flight Info ---
             if (booking.getFlight() != null) {
                 Flight f = booking.getFlight();
                 dto.setFlightNumber(f.getFlightNumber());
                 dto.setAirlineName(f.getAirlineName());
                 dto.setDepartureCity(f.getDepartureCity());
                 dto.setArrivalCity(f.getArrivalCity());
-
-                //  NEW: Include date/time for departure and arrival
                 dto.setDepartureTime(f.getDepartureTime());
                 dto.setArrivalTime(f.getArrivalTime());
-
-                // (Optional) you can add duration or aircraft type if needed:
-                // dto.setAircraftType(f.getAircraftType());
             }
 
-            // --- Ticket Info ---
             if (booking.getTicket() != null) {
                 dto.setSeatNumber(booking.getTicket().getSeatNumber());
                 dto.setPrice(booking.getTicket().getPrice());
                 dto.setTicketStatus(booking.getTicket().getStatus());
             }
 
-            details.add(dto);
+            list.add(dto);
         }
 
-        return details;
+        return list;
+    }
+
+    // CRUD Helpers
+    public Booking getBookingById(Long id) {
+        return bookingRepository.findById(id).orElse(null);
+    }
+
+    public Booking updateBooking(Long id, Booking updated) {
+        Booking booking = bookingRepository.findById(id).orElse(null);
+        if (booking == null) return null;
+        booking.setStatus(updated.getStatus());
+        booking.setTransactionId(updated.getTransactionId());
+        return bookingRepository.save(booking);
+    }
+
+    public void deleteBooking(Long id) {
+        bookingRepository.deleteById(id);
     }
 }

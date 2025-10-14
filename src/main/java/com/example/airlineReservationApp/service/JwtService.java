@@ -4,6 +4,7 @@ import com.example.airlineReservationApp.model.Account;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -33,6 +34,15 @@ public class JwtService {
                 .getBody()
                 .getSubject();
     }
+    public String extractEmailFromToken(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Missing or invalid Authorization header");
+        }
+        String token = authHeader.substring(7);
+        return extractEmail(token); // Assuming extractUsername(email) already exists
+    }
+
 
     public boolean validateToken(String token, String userEmail) {
         String extracted = extractEmail(token);
