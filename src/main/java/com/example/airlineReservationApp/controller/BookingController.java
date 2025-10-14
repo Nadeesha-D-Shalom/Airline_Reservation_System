@@ -8,6 +8,8 @@ import com.example.airlineReservationApp.service.BookingService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/api/bookings")
 @CrossOrigin(origins = "http://localhost:3000")
@@ -19,7 +21,7 @@ public class BookingController {
         this.bookingService = bookingService;
     }
 
-    // Create a new booking
+    //  Create new booking
     @PostMapping
     public Booking createBooking(@RequestBody BookingRequest request) {
         if (request.getPassengers() == null || request.getPassengers().isEmpty()) {
@@ -53,13 +55,27 @@ public class BookingController {
         );
     }
 
-    //  Get all bookings (raw)
-    @GetMapping
-    public List<Booking> getAllBookings() {
-        return bookingService.getAllBookings();
+    //  Get all bookings (ADMIN)
+    @GetMapping("/details")
+    public List<BookingDetailsDTO> getAllBookingDetails() {
+        return bookingService.getAllBookingDetails();
     }
 
-    // Get booking by ID
+    //  Get bookings only for logged-in user (email param version)
+    @GetMapping("/user")
+    public List<BookingDetailsDTO> getBookingsForUser(@RequestParam String email) {
+        return bookingService.getBookingsByUserEmail(email);
+    }
+
+    // Optional: If JWT version used
+    /*
+    @GetMapping("/my")
+    public List<BookingDetailsDTO> getBookingsForCurrentUser(HttpServletRequest request) {
+        return bookingService.getBookingsForCurrentUser(request);
+    }
+    */
+
+    //  Get one booking by ID
     @GetMapping("/{id}")
     public Booking getBookingById(@PathVariable Long id) {
         return bookingService.getBookingById(id);
@@ -71,15 +87,9 @@ public class BookingController {
         return bookingService.updateBooking(id, booking);
     }
 
-    // Delete booking
+    //  Delete booking
     @DeleteMapping("/{id}")
     public void deleteBooking(@PathVariable Long id) {
         bookingService.deleteBooking(id);
-    }
-
-    // NEW — Get full booking + passenger + flight + ticket details
-    @GetMapping("/details")
-    public List<BookingDetailsDTO> getAllBookingDetails() {
-        return bookingService.getAllBookingDetails();
     }
 }
