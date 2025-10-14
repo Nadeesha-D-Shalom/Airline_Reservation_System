@@ -29,7 +29,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/flights/**").permitAll()
                         .requestMatchers("/api/passengers/**").permitAll()
                         .requestMatchers("/api/bookings/**").permitAll()
+                        .requestMatchers("/api/complaints/**").permitAll()
                         .anyRequest().authenticated()
+
+
                 )
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
