@@ -8,8 +8,6 @@ import com.example.airlineReservationApp.service.BookingService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 @RestController
 @RequestMapping("/api/bookings")
 @CrossOrigin(origins = "http://localhost:3000")
@@ -21,7 +19,6 @@ public class BookingController {
         this.bookingService = bookingService;
     }
 
-    //  Create new booking
     @PostMapping
     public Booking createBooking(@RequestBody BookingRequest request) {
         if (request.getPassengers() == null || request.getPassengers().isEmpty()) {
@@ -55,41 +52,20 @@ public class BookingController {
         );
     }
 
-    //  Get all bookings (ADMIN)
-    @GetMapping("/details")
-    public List<BookingDetailsDTO> getAllBookingDetails() {
-        return bookingService.getAllBookingDetails();
-    }
-
-    //  Get bookings only for logged-in user (email param version)
     @GetMapping("/user")
     public List<BookingDetailsDTO> getBookingsForUser(@RequestParam String email) {
         return bookingService.getBookingsByUserEmail(email);
     }
 
-    // Optional: If JWT version used
-    /*
-    @GetMapping("/my")
-    public List<BookingDetailsDTO> getBookingsForCurrentUser(HttpServletRequest request) {
-        return bookingService.getBookingsForCurrentUser(request);
-    }
-    */
-
-    //  Get one booking by ID
-    @GetMapping("/{id}")
-    public Booking getBookingById(@PathVariable Long id) {
-        return bookingService.getBookingById(id);
+    @GetMapping("/tx/{transactionId}")
+    public BookingDetailsDTO getBookingByTransactionId(@PathVariable String transactionId,
+                                                       @RequestParam(required = false) String email) {
+        return bookingService.getBookingByTransactionId(transactionId, email);
     }
 
-    // Update booking
-    @PutMapping("/{id}")
-    public Booking updateBooking(@PathVariable Long id, @RequestBody Booking booking) {
-        return bookingService.updateBooking(id, booking);
-    }
 
-    //  Delete booking
-    @DeleteMapping("/{id}")
-    public void deleteBooking(@PathVariable Long id) {
-        bookingService.deleteBooking(id);
+    @GetMapping("/details")
+    public List<BookingDetailsDTO> getAllBookingDetails() {
+        return bookingService.getAllBookingDetails();
     }
 }
