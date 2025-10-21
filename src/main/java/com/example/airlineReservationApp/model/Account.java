@@ -26,4 +26,7 @@ public class Account {
 
     @Column(nullable = false)
     private String role; // USER or ADMIN
+
+    public Account(String name, String email, String password, String admin) {
+    }
 }
