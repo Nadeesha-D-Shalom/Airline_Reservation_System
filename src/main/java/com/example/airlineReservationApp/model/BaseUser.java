@@ -13,18 +13,17 @@ public abstract class BaseUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // use Long (not Integer)
+    private Long id;
 
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(name = "full_name", nullable = true)
+    @Column(name = "full_name")
     private String fullName;
-
 
     @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
-    private String role; // USER, ADMIN, etc.
+    private String role;
 }

@@ -58,23 +58,41 @@ public class BookingService {
 
         return saved;
     }
+        public List<BookingDetailsDTO> getBookingsByUserEmail(String email) {
+            List<Booking> bookings = bookingRepository.findAllByPassenger_EmailIgnoreCase(email);
 
-    public List<BookingDetailsDTO> getBookingsByUserEmail(String email) {
-        List<Passenger> passengers = passengerRepository.findByEmailIgnoreCase(email);
-        List<Booking> userBookings = new ArrayList<>();
+            return bookings.stream().map(b -> {
+                BookingDetailsDTO dto = new BookingDetailsDTO();
+                dto.setBookingId(b.getId());
+                dto.setBookingDate(
+                        b.getBookingDate() != null ? b.getBookingDate().toString() : "-"
+                );
+                dto.setTransactionId(b.getTransactionId());
+                dto.setBookingStatus(b.getStatus());
 
-        for (Passenger p : passengers) {
-            List<Booking> bookings = bookingRepository.findAll();
-            for (Booking b : bookings) {
-                if (b.getPassenger() != null && b.getPassenger().getId().equals(p.getId())) {
-                    userBookings.add(b);
+                if (b.getPassenger() != null) {
+                    dto.setPassengerName(b.getPassenger().getFullName());
+                    dto.setEmail(b.getPassenger().getEmail());
+                    dto.setPhone(b.getPassenger().getPhone());
+                    dto.setNationality(b.getPassenger().getNationality());
+                    dto.setPassport(b.getPassenger().getPassport());
                 }
-            }
-        }
-        return mapToBookingDetailsDTO(userBookings);
-    }
 
-    public List<BookingDetailsDTO> getAllBookingDetails() {
+                if (b.getFlight() != null) {
+                    dto.setFlightNumber(b.getFlight().getFlightNumber());
+                    dto.setAirlineName(b.getFlight().getAirlineName());
+                    dto.setDepartureCity(b.getFlight().getDepartureCity());
+                    dto.setArrivalCity(b.getFlight().getArrivalCity());
+                    dto.setDepartureTime(b.getFlight().getDepartureTime());
+                    dto.setArrivalTime(b.getFlight().getArrivalTime());
+                }
+
+                return dto;
+            }).toList();
+        }
+
+
+        public List<BookingDetailsDTO> getAllBookingDetails() {
         List<Booking> bookings = bookingRepository.findAll();
         return mapToBookingDetailsDTO(bookings);
     }

@@ -29,42 +29,53 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
+    // Updated Register method
     public Account register(RegisterRequest req) {
         if (accountRepo.findByEmail(req.getEmail()).isPresent()) {
             throw new RuntimeException("Email already registered. Please log in.");
         }
 
-        // Safely combine first + last name
+        // Safely combine first and last names
         String fullName = ((req.getFirstName() != null ? req.getFirstName() : "") + " " +
                 (req.getLastName() != null ? req.getLastName() : "")).trim();
 
-        if (fullName.isBlank()) fullName = "User";
+        if (fullName.isBlank()) {
+            fullName = "User";
+        }
 
-        // Save to Account table
+        // Create Account object
         Account account = new Account();
         account.setFullName(fullName);
         account.setEmail(req.getEmail());
         account.setPassword(passwordEncoder.encode(req.getPassword()));
-        account.setRole("USER");
+
+        // Allow Admin registration if role = ADMIN
+        if (req.getRole() != null && req.getRole().equalsIgnoreCase("ADMIN")) {
+            account.setRole("ADMIN");
+        } else {
+            account.setRole("USER");
+        }
+
         accountRepo.save(account);
 
-        // Save to UserEntity table
-        UserEntity user = new UserEntity();
-        user.setFullName(fullName);
-        user.setFirstName(req.getFirstName());
-        user.setLastName(req.getLastName());
-        user.setEmail(req.getEmail());
-        user.setPassword(account.getPassword());
-        user.setRole(account.getRole());
-        user.setAddress(req.getAddress());
-        user.setPhoneNumber(req.getPhoneNumber());
-        userRepo.save(user);
+        // Only create a UserEntity record for normal users
+        if (account.getRole().equalsIgnoreCase("USER")) {
+            UserEntity user = new UserEntity();
+            user.setFullName(fullName);
+            user.setFirstName(req.getFirstName());
+            user.setLastName(req.getLastName());
+            user.setEmail(req.getEmail());
+            user.setPassword(account.getPassword());
+            user.setRole(account.getRole());
+            user.setAddress(req.getAddress());
+            user.setPhoneNumber(req.getPhoneNumber());
+            userRepo.save(user);
+        }
 
         return account;
     }
 
 
-    // Login method (for authentication)
     public AuthResponse login(String email, String password) {
         Optional<Account> userOpt = accountRepo.findByEmail(email);
         if (userOpt.isEmpty()) {
@@ -77,10 +88,7 @@ public class AuthService {
             throw new RuntimeException("Invalid password");
         }
 
-        //  Generate JWT token
         String token = jwtService.generateToken(account);
-
-        // Return token + role
         return new AuthResponse(token, account.getRole());
     }
 }

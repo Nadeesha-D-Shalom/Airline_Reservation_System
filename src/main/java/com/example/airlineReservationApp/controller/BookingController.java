@@ -68,4 +68,7 @@ public class BookingController {
     public List<BookingDetailsDTO> getAllBookingDetails() {
         return bookingService.getAllBookingDetails();
     }
+
+
+
 }
