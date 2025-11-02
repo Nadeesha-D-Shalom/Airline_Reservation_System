@@ -9,16 +9,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/complaints")
-@CrossOrigin(origins = "http://localhost:3000") // adjust if needed
+@CrossOrigin(origins = "http://localhost:3000")
 public class ComplaintController {
 
     @Autowired
     private ComplaintService complaintService;
+
+    @Autowired
     private ComplaintRepository complaintRepository;
 
     // Create new complaint (User)
@@ -56,6 +59,7 @@ public class ComplaintController {
         return ResponseEntity.ok("Complaint deleted successfully");
     }
 
+    // Update complaint (User)
     @PutMapping("/{id}")
     public ResponseEntity<?> updateComplaint(@PathVariable Long id, @RequestBody Complaint updatedComplaint) {
         Optional<Complaint> optional = complaintRepository.findById(id);
@@ -78,5 +82,4 @@ public class ComplaintController {
         Complaint saved = complaintRepository.save(complaint);
         return ResponseEntity.ok(saved);
     }
-
 }

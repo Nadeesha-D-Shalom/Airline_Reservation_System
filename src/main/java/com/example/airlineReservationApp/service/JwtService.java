@@ -4,17 +4,23 @@ import com.example.airlineReservationApp.model.Account;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Service
 public class JwtService {
 
-    private static final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private static final long EXPIRATION_TIME = 1000L * 60 * 60 * 24; // 24h
+    private final SecretKey secretKey;
+
+    public JwtService(@Value("${jwt.secret}") String secret) {
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static final long EXPIRATION_TIME = 1000L * 60 * 60 * 24;
 
     public String generateToken(Account account) {
         return Jwts.builder()
@@ -22,30 +28,20 @@ public class JwtService {
                 .claim("role", account.getRole())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SECRET_KEY)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public String extractEmail(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
+                .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
     }
-    public String extractEmailFromToken(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("Missing or invalid Authorization header");
-        }
-        String token = authHeader.substring(7);
-        return extractEmail(token); // Assuming extractUsername(email) already exists
-    }
-
 
     public boolean validateToken(String token, String userEmail) {
-        String extracted = extractEmail(token);
-        return extracted.equals(userEmail);
+        return extractEmail(token).equals(userEmail);
     }
 }

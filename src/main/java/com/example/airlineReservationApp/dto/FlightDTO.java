@@ -1,27 +1,11 @@
 package com.example.airlineReservationApp.dto;
 
-import com.example.airlineReservationApp.model.Flight;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.LocalDateTime;
 
 public class FlightDTO {
 
-    private Long id;
-
     @JsonProperty("flight_number")
     private String flightNumber;
-
-    @JsonProperty("aircraft_type")
-    private String aircraftType;
-
-    @JsonProperty("country_of_register")
-    private String countryOfRegister;
-
-    @JsonProperty("aircraft_age")
-    private int aircraftAge;
-
-    @JsonProperty("serial_number")
-    private String serialNumber;
 
     @JsonProperty("airline_name")
     private String airlineName;
@@ -33,164 +17,63 @@ public class FlightDTO {
     private String arrivalCity;
 
     @JsonProperty("departure_time")
-    private LocalDateTime departureTime;
+    private String departureTime;
 
     @JsonProperty("arrival_time")
-    private LocalDateTime arrivalTime;
+    private String arrivalTime;
+
+    @JsonProperty("aircraft_type")
+    private String aircraftType;
+
+    @JsonProperty("aircraft_age")
+    private Integer aircraftAge;
+
+    @JsonProperty("country_of_register")
+    private String countryOfRegister;
+
+    @JsonProperty("serial_number")
+    private String serialNumber;
 
     @JsonProperty("on_ground")
     private boolean onGround;
 
-    public FlightDTO() {}
+    @JsonProperty("price")
+    private Double price;
 
-    public FlightDTO(Long id, String flightNumber, String aircraftType, String countryOfRegister,
-                     int aircraftAge, String serialNumber, String airlineName,
-                     String departureCity, String arrivalCity,
-                     LocalDateTime departureTime, LocalDateTime arrivalTime, boolean onGround) {
-        this.id = id;
-        this.flightNumber = flightNumber;
-        this.aircraftType = aircraftType;
-        this.countryOfRegister = countryOfRegister;
-        this.aircraftAge = aircraftAge;
-        this.serialNumber = serialNumber;
-        this.airlineName = airlineName;
-        this.departureCity = departureCity;
-        this.arrivalCity = arrivalCity;
-        this.departureTime = departureTime;
-        this.arrivalTime = arrivalTime;
-        this.onGround = onGround;
-    }
+    // ----- Getters / Setters -----
+    public String getFlightNumber() { return flightNumber; }
+    public void setFlightNumber(String flightNumber) { this.flightNumber = flightNumber; }
 
-    // ✅ Convert Entity → DTO
-    public static FlightDTO fromEntity(Flight f) {
-        if (f == null) return null;
-        return new FlightDTO(
-                f.getId(),
-                f.getFlightNumber(),
-                f.getAircraftType(),
-                f.getCountryOfRegister(),
-                f.getAircraftAge(),
-                f.getSerialNumber(),
-                f.getAirlineName(),
-                f.getDepartureCity(),
-                f.getArrivalCity(),
-                f.getDepartureTime(),
-                f.getArrivalTime(),
-                f.isOnGround()
-        );
-    }
+    public String getAirlineName() { return airlineName; }
+    public void setAirlineName(String airlineName) { this.airlineName = airlineName; }
 
-    //  Convert DTO → Entity
-    public Flight toEntity() {
-        Flight f = new Flight();
-        f.setId(this.id);
-        f.setFlightNumber(this.flightNumber);
-        f.setAircraftType(this.aircraftType);
-        f.setCountryOfRegister(this.countryOfRegister);
-        f.setAircraftAge(this.aircraftAge);
-        f.setSerialNumber(this.serialNumber);
-        f.setAirlineName(this.airlineName);
-        f.setDepartureCity(this.departureCity);
-        f.setArrivalCity(this.arrivalCity);
-        f.setDepartureTime(this.departureTime);
-        f.setArrivalTime(this.arrivalTime);
-        f.setOnGround(this.onGround);
-        return f;
-    }
+    public String getDepartureCity() { return departureCity; }
+    public void setDepartureCity(String departureCity) { this.departureCity = departureCity; }
 
-    public Long getId() {
-        return id;
-    }
+    public String getArrivalCity() { return arrivalCity; }
+    public void setArrivalCity(String arrivalCity) { this.arrivalCity = arrivalCity; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getDepartureTime() { return departureTime; }
+    public void setDepartureTime(String departureTime) { this.departureTime = departureTime; }
 
-    public String getFlightNumber() {
-        return flightNumber;
-    }
+    public String getArrivalTime() { return arrivalTime; }
+    public void setArrivalTime(String arrivalTime) { this.arrivalTime = arrivalTime; }
 
-    public void setFlightNumber(String flightNumber) {
-        this.flightNumber = flightNumber;
-    }
+    public String getAircraftType() { return aircraftType; }
+    public void setAircraftType(String aircraftType) { this.aircraftType = aircraftType; }
 
-    public String getAircraftType() {
-        return aircraftType;
-    }
+    public Integer getAircraftAge() { return aircraftAge; }
+    public void setAircraftAge(Integer aircraftAge) { this.aircraftAge = aircraftAge; }
 
-    public void setAircraftType(String aircraftType) {
-        this.aircraftType = aircraftType;
-    }
+    public String getCountryOfRegister() { return countryOfRegister; }
+    public void setCountryOfRegister(String countryOfRegister) { this.countryOfRegister = countryOfRegister; }
 
-    public String getCountryOfRegister() {
-        return countryOfRegister;
-    }
+    public String getSerialNumber() { return serialNumber; }
+    public void setSerialNumber(String serialNumber) { this.serialNumber = serialNumber; }
 
-    public void setCountryOfRegister(String countryOfRegister) {
-        this.countryOfRegister = countryOfRegister;
-    }
+    public boolean isOnGround() { return onGround; }
+    public void setOnGround(boolean onGround) { this.onGround = onGround; }
 
-    public int getAircraftAge() {
-        return aircraftAge;
-    }
-
-    public void setAircraftAge(int aircraftAge) {
-        this.aircraftAge = aircraftAge;
-    }
-
-    public String getSerialNumber() {
-        return serialNumber;
-    }
-
-    public void setSerialNumber(String serialNumber) {
-        this.serialNumber = serialNumber;
-    }
-
-    public String getAirlineName() {
-        return airlineName;
-    }
-
-    public void setAirlineName(String airlineName) {
-        this.airlineName = airlineName;
-    }
-
-    public String getDepartureCity() {
-        return departureCity;
-    }
-
-    public void setDepartureCity(String departureCity) {
-        this.departureCity = departureCity;
-    }
-
-    public String getArrivalCity() {
-        return arrivalCity;
-    }
-
-    public void setArrivalCity(String arrivalCity) {
-        this.arrivalCity = arrivalCity;
-    }
-
-    public LocalDateTime getDepartureTime() {
-        return departureTime;
-    }
-
-    public void setDepartureTime(LocalDateTime departureTime) {
-        this.departureTime = departureTime;
-    }
-
-    public LocalDateTime getArrivalTime() {
-        return arrivalTime;
-    }
-
-    public void setArrivalTime(LocalDateTime arrivalTime) {
-        this.arrivalTime = arrivalTime;
-    }
-
-    public boolean isOnGround() {
-        return onGround;
-    }
-
-    public void setOnGround(boolean onGround) {
-        this.onGround = onGround;
-    }
+    public Double getPrice() { return price; }
+    public void setPrice(Double price) { this.price = price; }
 }
